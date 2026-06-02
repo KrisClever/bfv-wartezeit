@@ -491,9 +491,9 @@
 <body>
 
 <div class="page-head">
-  <div class="eyebrow">Post SV Nürnberg · 6256</div>
+  <div class="eyebrow">Post SV Nürnberg</div>
   <h1 class="page-title">BFV<br>Wartezeit</h1>
-  <div class="page-sub">SAISON 2026 / 27 · JUGEND + HERREN</div>
+  <div class="page-sub">JUGEND · HERREN · FRAUEN</div>
 </div>
 
 <div class="input-card">
@@ -542,8 +542,6 @@
 
 <div class="pantone" id="result">
   <div class="swatch" id="swatch">
-    <div class="swatch-mini" id="swatchMini">SAISON 26/27</div>
-    <div class="swatch-code" id="swatchCode">#0062AD</div>
     <div class="swatch-letter" id="swatchLetter">D</div>
   </div>
   <div class="pantone-body">
@@ -575,7 +573,8 @@
 
 <div class="page-foot">
   BFV-JUGENDORDNUNG · SPIELORDNUNG<br>
-  OHNE GEWÄHR
+  OHNE GEWÄHR<br>
+  VERSION 2026-06-02-v12
 </div>
 
 <!-- Wheel Picker -->
@@ -626,7 +625,12 @@
   const state = { geburtsdatum: null, abmeldung: null, letztesSpiel: null, freigabe: null, geschlecht: null };
 
   const dim = (y, m) => new Date(y, m+1, 0).getDate();
-  const addMonths = (d, n) => { const r = new Date(d); r.setMonth(r.getMonth()+n); return r; };
+  // addMonths mit Monatsende-Clipping (z.B. 31.05 + 6M = 30.11, nicht 01.12)
+  const addMonths = (d, n) => {
+    const result = new Date(d.getFullYear(), d.getMonth() + n, d.getDate());
+    if (result.getDate() !== d.getDate()) result.setDate(0);
+    return result;
+  };
   const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate()+n); return r; };
   const maxD = (...a) => new Date(Math.max(...a.map(x => x.getTime())));
   const fmtDe = d => `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
@@ -802,6 +806,11 @@
     const tA = addDays(ab, 1);
     const tL = ls ? addDays(ls, 1) : null;
     const inSommer = ab >= JUG_SOMMER_VON && ab <= JUG_SOMMER_BIS;
+
+    // Wegfall der Wartefrist bei 6 Monaten Spielpause — gilt auch in der Jugend
+    const inaktivDatum = ls ? addDays(addMonths(ls, 6), 1) : null;
+    const inaktivSpielrecht = inaktivDatum ? maxD(inaktivDatum, tA) : null;
+
     let pri = inSommer ? SAISON_START_JUGEND : tA;
     let ver = null, hin = [];
 
@@ -810,69 +819,100 @@
       hin.push('Im Minifußball (E-, F-, G-Jugend) reicht das Privatspielrecht für Meisterschaftsspiele. <strong>Keine Wartezeit.</strong>');
       if (inSommer) hin.push('Spielrecht ab Eingang der Unterlagen, frühestens ab <strong>01.08.2026</strong>.');
       else hin.push('Spielrecht ab Eingang der Unterlagen beim BFV.');
-    } else {
-      if (inSommer) {
-        if (f === 'ja') {
-          ver = SAISON_START_JUGEND;
-          hin.push('<strong>Sommerwechsel mit Freigabe:</strong> Verbandsspielrecht ab 01.08.2026 (Saisonstart).');
-          hin.push('Passantrag-Eingang bis spätestens <strong>30.09.2026</strong>.');
-        } else {
-          let we = addMonths(tA, 3);
-          if (tL && ls > ab) { we = maxD(we, addMonths(tL, 3)); hin.push('Wartezeit verlängert, da letztes Spiel nach Abmeldung lag.'); }
-          ver = maxD(we, SAISON_START_JUGEND);
-          hin.push('<strong>Sommerwechsel ohne Freigabe:</strong> 3 Monate Wartezeit ab Tag nach Abmeldung.');
-        }
-      } else {
-        const mn = f === 'ja' ? 3 : 6;
-        let we = addMonths(tA, mn);
-        if (tL && ls > ab) { we = maxD(we, addMonths(tL, mn)); hin.push('Wartezeit verlängert, da letztes Spiel nach Abmeldung lag.'); }
-        ver = we;
-        if (f === 'ja') hin.push('<strong>Wechsel während Spieljahr mit Freigabe:</strong> 3 Monate Wartezeit ab Tag nach Abmeldung.');
-        else hin.push('<strong>Wechsel während Spieljahr ohne Freigabe:</strong> 6 Monate Wartezeit ab Tag nach Abmeldung.');
-      }
+      return { pri, ver, hin };
     }
+
+    // Reguläre Berechnung
+    if (inSommer) {
+      if (f === 'ja') {
+        ver = SAISON_START_JUGEND;
+        hin.push('<strong>Sommerwechsel mit Freigabe:</strong> Verbandsspielrecht ab 01.08.2026 (Saisonstart).');
+        hin.push('Passantrag-Eingang bis spätestens <strong>30.09.2026</strong>.');
+      } else {
+        let we = addMonths(tA, 3);
+        if (tL && ls > ab) { we = maxD(we, addMonths(tL, 3)); hin.push('Wartezeit verlängert, da letztes Spiel nach Abmeldung lag.'); }
+        ver = maxD(we, SAISON_START_JUGEND);
+        hin.push('<strong>Sommerwechsel ohne Freigabe:</strong> 3 Monate Wartezeit ab Tag nach Abmeldung.');
+      }
+    } else {
+      const mn = f === 'ja' ? 3 : 6;
+      let we = addMonths(tA, mn);
+      if (tL && ls > ab) { we = maxD(we, addMonths(tL, mn)); hin.push('Wartezeit verlängert, da letztes Spiel nach Abmeldung lag.'); }
+      ver = we;
+      if (f === 'ja') hin.push('<strong>Wechsel während Spieljahr mit Freigabe:</strong> 3 Monate Wartezeit ab Tag nach Abmeldung.');
+      else hin.push('<strong>Wechsel während Spieljahr ohne Freigabe:</strong> 6 Monate Wartezeit ab Tag nach Abmeldung.');
+    }
+
+    // Wegfall der Wartefrist: gewinnt bei früherer 6-Monats-Inaktivität.
+    // Reguläre Hinweise werden ersetzt, da sie sonst widersprüchlich wären.
+    if (inaktivSpielrecht && inaktivSpielrecht < ver) {
+      const regulaer = fmtDe(ver);
+      ver = inaktivSpielrecht;
+      hin = [
+        '<strong>Wegfall der Wartefrist:</strong> Spieler ist seit letztem Spiel durchgehend 6 Monate inaktiv → Verbandsspielrecht ab <strong>' + fmtDe(inaktivSpielrecht) + '</strong>. Nachweis der Spielpause beilegen.',
+        'Die reguläre Wartezeit (bis ' + regulaer + ') entfällt dadurch.'
+      ];
+    }
+
     return { pri, ver, hin };
   }
 
   // === Berechnung Herren/Frauen ===
   function calcH(ab, ls, f, geschlecht) {
-    const tA = addDays(ab, 1);
-    const tL = ls ? addDays(ls, 1) : null;
+    const tA = addDays(ab, 1); // Tag nach Abmeldung ≈ Antragseingang
     const inWP1 = ab <= HERREN_WP1_END;
     const inWP2 = ab > HERREN_WP1_END && ab <= HERREN_WP2_END;
     const paragraph = geschlecht === 'weiblich' ? '§ 39 FMO' : '§ 44 SpO';
-    let pri = tA, ver = null, hin = [];
+
+    // § 44 Nr. 2: "nach Ablauf von sechs Monaten, gerechnet ab dem zuletzt gespielten Spiel"
+    // BFV-Praxis: letztes Spiel + 6 Monate, spielberechtigt am Tag NACH Ablauf (+1 Tag).
+    // Frühestens jedoch ab Antragseingang (man kann nicht vor Anmeldung spielen).
+    const inaktivDatum = ls ? addDays(addMonths(ls, 6), 1) : null;
+    const inaktivSpielrecht = inaktivDatum ? maxD(inaktivDatum, tA) : null;
+
+    // Privatspielrecht (Freundschaftsspiele): immer ab Antragseingang
+    let pri = tA;
+    let ver = null, hin = [];
 
     if (inWP1) {
-      pri = maxD(tA, SAISON_START_HERREN);
       if (f === 'ja') {
         ver = maxD(tA, SAISON_START_HERREN);
         hin.push('<strong>WP I (Sommer) mit Zustimmung:</strong> Verbandsspielrecht ab Eingang, frühestens 01.07.2026.');
         hin.push('Passantrag-Eingang bis spätestens <strong>31.08.2026</strong>.');
       } else {
-        ver = HERREN_NICHTZ_VERBAND;
-        hin.push('<strong>WP I ohne Zustimmung:</strong> Pflichtspielrecht ab festem Stichtag <strong>01.11.2026</strong> (Sperrfrist — keine berechnete Wartezeit).');
+        ver = HERREN_NICHTZ_VERBAND; // 01.11.2026
+        hin.push('<strong>WP I ohne Zustimmung:</strong> Pflichtspielrecht ab festem Stichtag <strong>01.11.2026</strong> (§ 42 Nr. 3).');
         hin.push('Alternative: Ausbildungsentschädigung zahlen → ersetzt fehlende Zustimmung (bis 31.08.2026).');
-        hin.push('Alternative: Nachweis 6-monatiger Spielpause (' + paragraph + ').');
       }
     } else if (inWP2) {
-      pri = maxD(tA, SAISON_WINTER_START);
       if (f === 'ja') {
         ver = maxD(tA, SAISON_WINTER_START);
         hin.push('<strong>WP II (Winter) mit Zustimmung:</strong> Verbandsspielrecht ab Eingang, frühestens 01.01.2027.');
         hin.push('Passantrag-Eingang bis spätestens <strong>31.01.2027</strong>.');
-        hin.push('In WP II keine Ausbildungsentschädigung als Zustimmungsersatz möglich.');
+        hin.push('In WP II keine Ausbildungsentschädigung als Zustimmungsersatz möglich (§ 43 Nr. 4).');
       } else {
-        ver = 'INAKTIV';
-        hin.push('<strong>WP II ohne Zustimmung:</strong> Verbandsspielrecht nur nach <strong>6-monatiger Spielpause</strong> (' + paragraph + ').');
-        if (ls) { const sm = addMonths(tL, 6); hin.push('Frühestens: <strong>' + fmtDe(sm) + '</strong>.'); }
+        ver = new Date(2027, 10, 1); // 01.11.2027
+        hin.push('<strong>WP II ohne Zustimmung:</strong> Verbandsspielrecht frühestens zum <strong>01.11.2027</strong> (01.11. des folgenden Spieljahres, § 43 Nr. 3).');
+        hin.push('In WP II keine Ausbildungsentschädigung als Zustimmungsersatz möglich (§ 43 Nr. 4).');
       }
     } else {
-      pri = tA;
+      // Außerhalb beider Wechselperioden
       ver = 'INAKTIV';
-      hin.push('<strong>Außerhalb der Wechselperioden:</strong> Privatspielrecht sofort. Verbandsspielrecht nur nach 6-monatiger Spielpause (' + paragraph + ') oder Warten auf nächste WP.');
-      if (ls) { const sm = addMonths(tL, 6); hin.push('Frühestens via Inaktivität: <strong>' + fmtDe(sm) + '</strong>.'); }
+      hin.push('<strong>Außerhalb der Wechselperioden:</strong> Privatspielrecht sofort ab Antragseingang. Verbandsspielrecht nur über Inaktivität (' + paragraph + ' Nr. 2) oder Warten auf nächste WP I.');
     }
+
+    // § 44 Nr. 2 "bleibt unberührt": Der Inaktivitäts-Wegfall greift in ALLEN Fällen
+    // (auch mit Zustimmung, auch in WP II) und gewinnt, wenn er ein früheres Datum ergibt.
+    // Reguläre Hinweise werden dann ersetzt, da sie sonst widersprüchlich wären.
+    if (inaktivSpielrecht && (ver === 'INAKTIV' || inaktivSpielrecht < ver)) {
+      const regulaer = (ver === 'INAKTIV') ? null : fmtDe(ver);
+      ver = inaktivSpielrecht;
+      hin = [
+        '<strong>Wegfall der Wartefrist (' + paragraph + ' Nr. 2):</strong> Spieler ist seit letztem Spiel durchgehend 6 Monate inaktiv → Verbandsspielrecht ab <strong>' + fmtDe(inaktivSpielrecht) + '</strong>. Nachweis der Spielpause (alle Spiele inkl. Freundschaftsspiele) beilegen.'
+      ];
+      if (regulaer) hin.push('Die reguläre Frist (bis ' + regulaer + ') entfällt dadurch.');
+    }
+
     return { pri, ver, hin };
   }
 
@@ -894,9 +934,6 @@
     // Render
     const color = COLORS[ak.kuerzel] || COLORS.D;
     document.getElementById('swatch').style.setProperty('--swatch-color', color);
-    document.getElementById('swatchCode').textContent = color.toUpperCase();
-    const saisonLabel = String(ak.saison.start).slice(-2) + '/' + String(ak.saison.end).slice(-2);
-    document.getElementById('swatchMini').textContent = 'SAISON ' + saisonLabel;
 
     const letterEl = document.getElementById('swatchLetter');
     letterEl.textContent = ak.letter;
