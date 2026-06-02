@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Wartezeit">
+<meta name="apple-mobile-web-app-title" content="Pass-App">
 <meta name="theme-color" content="#0062AD">
-<title>BFV Wartezeit</title>
+<title>Pass-App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -46,7 +46,129 @@
     max-width: 480px;
     margin: 0 auto;
     width: 100%;
+    position: relative;
   }
+
+  /* === Hamburger menu === */
+  .head-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .menu-btn {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    cursor: pointer;
+    z-index: 60;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    transition: background 0.15s, transform 0.08s;
+  }
+  .menu-btn:active { transform: scale(0.94); background: rgba(255,255,255,0.18); }
+  .menu-btn span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--white);
+    border-radius: 2px;
+  }
+
+  .menu-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 110;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+  }
+  .menu-overlay.visible { opacity: 1; pointer-events: auto; }
+
+  .menu-panel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(82vw, 320px);
+    background: var(--cream);
+    z-index: 111;
+    transform: translateX(100%);
+    transition: transform 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: -20px 0 60px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    padding: max(env(safe-area-inset-top), 20px) 0 max(env(safe-area-inset-bottom), 20px);
+  }
+  .menu-panel.visible { transform: translateX(0); }
+
+  .menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 20px 18px;
+    border-bottom: 1.5px solid var(--line);
+  }
+  .menu-title {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .menu-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--ink-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+  .menu-close:active { background: rgba(0,0,0,0.06); }
+
+  .menu-links {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+  .menu-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.12s;
+  }
+  .menu-link:active { background: rgba(0,0,0,0.05); }
+  .menu-link::after {
+    content: '→';
+    color: var(--ink-muted);
+    font-weight: 700;
+  }
+  .menu-link[aria-disabled="true"] {
+    color: var(--ink-muted);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .menu-link[aria-disabled="true"]::after { content: ''; }
 
   /* === Page header === */
   .page-head {
@@ -61,7 +183,7 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     opacity: 0.85;
-    margin-bottom: 10px;
+    margin-bottom: 0;
   }
 
   .page-title {
@@ -497,7 +619,12 @@
 <body>
 
 <div class="page-head">
-  <div class="eyebrow">Post SV Nürnberg</div>
+  <div class="head-top">
+    <div class="eyebrow">Post SV Nürnberg</div>
+    <button type="button" class="menu-btn" id="menuBtn" aria-label="Menü öffnen">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
   <h1 class="page-title">Vereinswechsel<br>Wartezeit</h1>
   <div class="page-sub">JUGEND · HERREN · FRAUEN</div>
 </div>
@@ -578,10 +705,25 @@
 </div>
 
 <div class="page-foot">
-  BFV-JUGENDORDNUNG · SPIELORDNUNG<br>
-  OHNE GEWÄHR<br>
-  VERSION 2026-06-02-v14
+  VERSION 2026-06-02-v18
 </div>
+
+<!-- Hamburger-Menü -->
+<div class="menu-overlay" id="menuOverlay"></div>
+<nav class="menu-panel" id="menuPanel" role="dialog" aria-modal="true" aria-label="Navigationsmenü">
+  <div class="menu-head">
+    <span class="menu-title">Menü</span>
+    <button type="button" class="menu-close" id="menuClose" aria-label="Menü schließen">✕</button>
+  </div>
+  <div class="menu-links">
+    <!-- LINKS HIER EINFÜGEN. Schema:
+         <a class="menu-link" href="DATEINAME.html">Bezeichnung</a>
+         href kann eine andere Datei im selben Repo sein (z.B. passantrag.html)
+         oder ein externer Link (https://...). -->
+    <a class="menu-link" href="index.html">Wartezeitenrechner</a>
+    <a class="menu-link" href="#" aria-disabled="true">Weitere Tools folgen…</a>
+  </div>
+</nav>
 
 <!-- Wheel Picker -->
 <div class="picker-overlay" id="pov"></div>
@@ -602,6 +744,23 @@
 
 <script>
 (function() {
+  // === Hamburger-Menü ===
+  const menuBtn = document.getElementById('menuBtn');
+  const menuOverlay = document.getElementById('menuOverlay');
+  const menuPanel = document.getElementById('menuPanel');
+  const menuClose = document.getElementById('menuClose');
+  const openMenu = () => { menuOverlay.classList.add('visible'); menuPanel.classList.add('visible'); };
+  const closeMenu = () => { menuOverlay.classList.remove('visible'); menuPanel.classList.remove('visible'); };
+  menuBtn.addEventListener('click', openMenu);
+  menuClose.addEventListener('click', closeMenu);
+  menuOverlay.addEventListener('click', closeMenu);
+  // Tippen auf einen aktiven Link schließt das Menü (und navigiert dann zur Datei)
+  menuPanel.querySelectorAll('.menu-link:not([aria-disabled="true"])').forEach(a => {
+    a.addEventListener('click', closeMenu);
+  });
+  // ESC schließt Menü (Desktop)
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
   const MONTHS = ['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   const IH = 44;
 
@@ -817,14 +976,14 @@
     const inaktivDatum = ls ? addDays(addMonths(ls, 6), 1) : null;
     const inaktivSpielrecht = inaktivDatum ? maxD(inaktivDatum, tA) : null;
 
-    let pri = inSommer ? SAISON_START_JUGEND : tA;
+    // Privatspielrecht (Freundschaftsspiele): immer ab Antragseingang — nicht ab Saisonstart
+    let pri = tA;
     let ver = null, hin = [];
 
     if (!ak.verband) {
       ver = 'KEINE';
       hin.push('Im Minifußball (E-, F-, G-Jugend) reicht das Privatspielrecht für Meisterschaftsspiele. <strong>Keine Wartezeit.</strong>');
-      if (inSommer) hin.push('Spielrecht ab Eingang der Unterlagen, frühestens ab <strong>01.08.2026</strong>.');
-      else hin.push('Spielrecht ab Eingang der Unterlagen beim BFV.');
+      hin.push('Privatspielrecht ab Eingang der vollständigen Unterlagen beim BFV — sofort spielberechtigt.');
       return { pri, ver, hin };
     }
 
