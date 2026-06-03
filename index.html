@@ -11,717 +11,259 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <style>
   :root {
-    --bg: #0062AD;
-    --bg-deep: #004A82;
-    --cream: #F2EDE3;
-    --cream-dark: #E8E2D5;
-    --ink: #0A0A0A;
-    --ink-soft: #2A2A2A;
-    --ink-muted: #6B6B6B;
-    --line: rgba(10,10,10,0.12);
-    --white: #FFFFFF;
-    --accent: #FFB800;
-    --ok: #1B7B47;
-    --no: #C0392B;
+    --bg: #0062AD; --bg-deep: #004A82; --cream: #F2EDE3; --cream-dark: #E8E2D5;
+    --ink: #0A0A0A; --ink-soft: #2A2A2A; --ink-muted: #6B6B6B; --line: rgba(10,10,10,0.12);
+    --white: #FFFFFF; --accent: #FFB800; --ok: #1B7B47; --no: #C0392B;
   }
-
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; }
-
   html, body {
-    background: var(--bg);
-    color: var(--ink);
+    background: var(--bg); color: var(--ink);
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 16px;
-    line-height: 1.45;
-    min-height: 100vh;
-    min-height: 100dvh;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    font-size: 16px; line-height: 1.45; min-height: 100vh; min-height: 100dvh;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
   }
-
   body {
     padding: max(env(safe-area-inset-top), 16px) clamp(14px, 4.5vw, 22px) max(env(safe-area-inset-bottom), 24px) clamp(14px, 4.5vw, 22px);
-    max-width: 480px;
-    margin: 0 auto;
-    width: 100%;
-    position: relative;
+    max-width: 480px; margin: 0 auto; width: 100%; position: relative;
   }
 
-  /* === Hamburger menu === */
-  .head-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 18px;
-  }
+  /* Hamburger */
+  .head-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
   .menu-btn {
-    flex-shrink: 0;
-    width: 42px;
-    height: 42px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 12px;
-    cursor: pointer;
-    z-index: 60;
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    transition: background 0.15s, transform 0.08s;
+    flex-shrink: 0; width: 42px; height: 42px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px; cursor: pointer; z-index: 60;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: background 0.15s, transform 0.08s;
   }
   .menu-btn:active { transform: scale(0.94); background: rgba(255,255,255,0.18); }
-  .menu-btn span {
-    display: block;
-    width: 18px;
-    height: 2px;
-    background: var(--white);
-    border-radius: 2px;
-  }
+  .menu-btn span { display: block; width: 18px; height: 2px; background: var(--white); border-radius: 2px; }
 
-  .menu-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 110;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.28s ease;
-  }
+  .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 110; opacity: 0; pointer-events: none; transition: opacity 0.28s ease; }
   .menu-overlay.visible { opacity: 1; pointer-events: auto; }
-
-  .menu-panel {
-    position: fixed;
-    top: 0; right: 0; bottom: 0;
-    width: min(82vw, 320px);
-    background: var(--cream);
-    z-index: 111;
-    transform: translateX(100%);
-    transition: transform 0.34s cubic-bezier(0.32, 0.72, 0, 1);
-    box-shadow: -20px 0 60px rgba(0,0,0,0.3);
-    display: flex;
-    flex-direction: column;
-    padding: max(env(safe-area-inset-top), 20px) 0 max(env(safe-area-inset-bottom), 20px);
-  }
+  .menu-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(82vw, 320px); background: var(--cream); z-index: 111; transform: translateX(100%); transition: transform 0.34s cubic-bezier(0.32,0.72,0,1); box-shadow: -20px 0 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; padding: max(env(safe-area-inset-top), 20px) 0 max(env(safe-area-inset-bottom), 20px); }
   .menu-panel.visible { transform: translateX(0); }
-
-  .menu-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 20px 18px;
-    border-bottom: 1.5px solid var(--line);
-  }
-  .menu-title {
-    font-family: 'Archivo', sans-serif;
-    font-weight: 900;
-    font-size: 22px;
-    letter-spacing: -0.01em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-  .menu-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    line-height: 1;
-    color: var(--ink-muted);
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 8px;
-  }
+  .menu-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 20px 18px; border-bottom: 1.5px solid var(--line); }
+  .menu-title { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 22px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--ink); }
+  .menu-close { background: none; border: none; font-size: 24px; line-height: 1; color: var(--ink-muted); cursor: pointer; padding: 4px 8px; border-radius: 8px; }
   .menu-close:active { background: rgba(0,0,0,0.06); }
-
-  .menu-links {
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 8px 0;
-  }
-  .menu-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    font-family: 'Archivo', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    color: var(--ink);
-    text-decoration: none;
-    border-bottom: 1px solid var(--line);
-    transition: background 0.12s;
-  }
+  .menu-links { display: flex; flex-direction: column; overflow-y: auto; padding: 8px 0; }
+  .menu-link { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 16px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); transition: background 0.12s; }
   .menu-link:active { background: rgba(0,0,0,0.05); }
-  .menu-link::after {
-    content: '→';
-    color: var(--ink-muted);
-    font-weight: 700;
-  }
-  .menu-link[aria-disabled="true"] {
-    color: var(--ink-muted);
-    font-weight: 500;
-    pointer-events: none;
-  }
-  .menu-link[aria-disabled="true"]::after { content: ''; }
+  .menu-link::after { content: '→'; color: var(--ink-muted); font-weight: 700; }
+  .menu-link.current { color: var(--ink-muted); }
+  .menu-link.current::after { content: '•'; }
 
-  /* === Page header === */
-  .page-head {
-    color: var(--white);
-    margin: 12px 0 28px;
-  }
+  /* Header */
+  .page-head { color: var(--white); margin: 0 0 24px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.75; margin-bottom: 0; line-height: 1.3; white-space: nowrap; }
+  .page-title { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: clamp(30px, 11vw, 48px); line-height: 0.92; letter-spacing: -0.035em; text-transform: uppercase; white-space: nowrap; }
+  .page-sub { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; opacity: 0.75; margin-top: 12px; letter-spacing: 0.02em; }
 
-  .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    opacity: 0.85;
-    margin-bottom: 0;
-  }
+  /* Card */
+  .input-card { background: var(--cream); border-radius: 24px; padding: clamp(18px,5.5vw,24px) clamp(16px,5vw,22px) 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08); }
+  .section-label { font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); margin: 6px 0 14px; }
+  .section-label.mt { margin-top: 26px; padding-top: 22px; border-top: 1.5px solid var(--line); }
+  .field { margin-bottom: 16px; }
+  .field-row { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
+  .field-label { display: block; font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; }
 
-  .page-title {
-    font-family: 'Archivo', sans-serif;
-    font-weight: 900;
-    font-size: clamp(26px, 8.5vw, 44px);
-    line-height: 0.92;
-    letter-spacing: -0.035em;
-    text-transform: uppercase;
-    white-space: nowrap;
+  input.text-input, .date-btn {
+    width: 100%; background: var(--white); border: none; border-radius: 14px;
+    padding: 15px 16px; font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 16px;
+    color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); transition: box-shadow 0.15s; -webkit-appearance: none; appearance: none;
   }
-
-  .page-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    opacity: 0.75;
-    margin-top: 12px;
-    letter-spacing: 0.02em;
-  }
-
-  /* === Input card === */
-  .input-card {
-    background: var(--cream);
-    border-radius: 24px;
-    padding: clamp(18px, 5.5vw, 24px) clamp(16px, 5vw, 22px) 22px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
-  }
-
-  .field {
-    margin-bottom: 18px;
-  }
-  .field:last-of-type { margin-bottom: 22px; }
-
-  .field-label {
-    font-family: 'Archivo', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 8px;
-    display: block;
-  }
-
-  .date-btn {
-    width: 100%;
-    background: var(--white);
-    border: none;
-    border-radius: 14px;
-    padding: 16px 18px;
-    font-family: 'Archivo', sans-serif;
-    font-weight: 600;
-    font-size: 17px;
-    color: var(--ink);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: transform 0.08s, box-shadow 0.15s;
-    box-shadow: inset 0 0 0 1.5px var(--line);
-  }
-  .date-btn:active { transform: scale(0.985); }
+  input.text-input::placeholder { color: var(--ink-muted); font-weight: 400; }
+  input.text-input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+  input.text-input.invalid { box-shadow: inset 0 0 0 2px var(--no); }
+  .field-error { color: var(--no); font-size: 12.5px; font-weight: 600; margin-top: 7px; line-height: 1.35; display: none; }
+  .field-error.show { display: block; }
+  .date-btn { cursor: pointer; display: flex; align-items: center; justify-content: space-between; text-align: left; }
+  .date-btn:active { transform: scale(0.99); }
   .date-btn.has-value { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .date-btn.invalid { box-shadow: inset 0 0 0 2px var(--no); }
+  .toggle-row.invalid .toggle { box-shadow: inset 0 0 0 2px var(--no); }
   .date-btn .val.placeholder { color: var(--ink-muted); font-weight: 400; }
-  .date-btn .chev {
-    color: var(--ink);
-    opacity: 0.4;
-    font-size: 14px;
-  }
+  .date-btn .chev { color: var(--ink); opacity: 0.4; font-size: 14px; }
 
-  .toggle-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .toggle {
-    background: var(--white);
-    border: none;
-    border-radius: 14px;
-    padding: 16px clamp(8px, 3vw, 16px);
-    font-family: 'Archivo', sans-serif;
-    font-weight: 700;
-    font-size: clamp(14px, 4vw, 16px);
-    letter-spacing: 0.03em;
-    color: var(--ink);
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.15s;
-    box-shadow: inset 0 0 0 1.5px var(--line);
-    white-space: nowrap;
-  }
+  .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .toggle { background: var(--white); border: none; border-radius: 14px; padding: 15px clamp(6px,2.5vw,14px); font-family: 'Archivo', sans-serif; font-weight: 700; font-size: clamp(12px,3.6vw,15px); letter-spacing: 0.01em; color: var(--ink); cursor: pointer; text-transform: uppercase; transition: all 0.15s; box-shadow: inset 0 0 0 1.5px var(--line); white-space: nowrap; }
   .toggle:active { transform: scale(0.985); }
-  .toggle.on[data-value="ja"] {
-    background: var(--ok);
-    color: var(--white);
-    box-shadow: none;
-  }
-  .toggle.on[data-value="nein"] {
-    background: var(--no);
-    color: var(--white);
-    box-shadow: none;
-  }
-  .toggle.on[data-value="maennlich"],
-  .toggle.on[data-value="weiblich"] {
-    background: var(--ink);
-    color: var(--white);
-    box-shadow: none;
-  }
+  .toggle.on[data-value="maennlich"], .toggle.on[data-value="weiblich"], .toggle.on[data-value="erstausstellung"], .toggle.on[data-value="vereinswechsel"] { background: var(--ink); color: var(--white); box-shadow: none; }
 
-  .submit {
-    width: 100%;
-    background: var(--ink);
-    color: var(--white);
-    border: none;
-    border-radius: 16px;
-    padding: 20px;
-    font-family: 'Archivo', sans-serif;
-    font-weight: 800;
-    font-size: 17px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: transform 0.08s, background 0.15s;
-  }
-  .submit:active { transform: scale(0.99); background: var(--ink-soft); }
+  #vwFields { display: none; }
+  #vwFields.visible { display: block; }
+  .passnr-row { display: flex; align-items: center; gap: 10px; }
+  .passnr-row .text-input { text-align: center; letter-spacing: 0.14em; }
+  .passnr-dash { font-family: 'Archivo', sans-serif; font-weight: 700; color: var(--ink-muted); font-size: 22px; flex-shrink: 0; }
 
-  /* === Result Pantone Card === */
-  .pantone {
-    margin-top: 24px;
-    background: var(--cream);
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.10);
-    display: none;
-    transform: translateY(8px);
-    opacity: 0;
-    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .pantone.visible {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .submit { width: 100%; background: var(--ink); color: var(--white); border: none; border-radius: 16px; padding: 19px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.15s, transform 0.08s; margin-top: 6px; }
+  .notice { background: #FFF4D6; border: 1.5px solid var(--accent); border-radius: 14px; padding: 15px 17px; margin: 4px 0 18px; display: none; }
+  .notice.show { display: block; }
+  .notice-title { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A6D00; margin-bottom: 9px; display: flex; align-items: center; gap: 7px; }
+  .notice ul { margin: 0; padding-left: 18px; }
+  .notice li { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 6px; line-height: 1.45; }
+  .notice li:last-child { margin-bottom: 0; }
+  .notice li strong { color: var(--ink); }
+  .submit:active { transform: scale(0.99); background: var(--bg-deep); }
+  .submit:disabled { opacity: 0.6; }
 
-  .swatch {
-    position: relative;
-    aspect-ratio: 4 / 3;
-    background: var(--swatch-color, var(--bg));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    overflow: hidden;
-  }
+  /* Result */
+  .result { margin-top: 22px; background: var(--cream); border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.22); display: none; transform: translateY(8px); opacity: 0; transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2,0.8,0.2,1); }
+  .result.visible { display: block; opacity: 1; transform: translateY(0); }
+  .result-top { background: var(--ok); color: #fff; padding: 20px 22px; }
+  .result-top.error { background: var(--no); }
+  .result-kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; }
+  .result-headline { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 24px; text-transform: uppercase; margin-top: 4px; line-height: 1.05; }
+  .result-body { padding: 20px 22px 22px; }
+  .result-meta { font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.5; }
+  .result-meta strong { color: var(--ink); }
+  .dl-btn { width: 100%; display: block; text-align: center; background: var(--ink); color: #fff; border: none; border-radius: 14px; padding: 16px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 16px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; text-decoration: none; }
+  .dl-btn:active { background: var(--bg-deep); }
 
-  .swatch-letter {
-    font-family: 'Archivo', sans-serif;
-    font-weight: 900;
-    font-size: clamp(140px, 48vw, 220px);
-    line-height: 0.8;
-    letter-spacing: -0.06em;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .swatch-letter.compact { font-size: clamp(90px, 32vw, 140px); }
+  .page-foot { text-align: center; margin-top: 22px; color: rgba(255,255,255,0.6); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; line-height: 1.7; }
 
-  .swatch-mini {
-    position: absolute;
-    top: 16px;
-    left: 18px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.85;
-  }
-  .swatch-code {
-    position: absolute;
-    top: 16px;
-    right: 18px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    opacity: 0.85;
-  }
-
-  .pantone-body {
-    padding: 22px clamp(18px, 5.5vw, 24px) 24px;
-  }
-
-  .pantone-title {
-    font-family: 'Archivo', sans-serif;
-    font-weight: 900;
-    font-size: clamp(24px, 7.5vw, 30px);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    color: var(--ink);
-    overflow-wrap: break-word;
-  }
-
-  .pantone-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink-muted);
-    margin-top: 8px;
-    letter-spacing: 0.04em;
-  }
-
-  .rights {
-    margin-top: 22px;
-    border-top: 1.5px solid var(--line);
-  }
-
-  .right-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 14px 0;
-    border-bottom: 1.5px solid var(--line);
-    gap: 16px;
-  }
-  .right-row:last-child { border-bottom: none; }
-
-  .right-label {
-    font-family: 'Archivo', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-  }
-
-  .right-val {
-    font-family: 'Archivo', sans-serif;
-    font-weight: 700;
-    font-size: clamp(16px, 5vw, 19px);
-    color: var(--ink);
-    text-align: right;
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .right-val.muted { color: var(--ok); font-size: 14px; font-style: italic; font-weight: 600; white-space: normal; }
-  .right-val.warn { color: var(--no); font-size: 13px; font-weight: 600; line-height: 1.3; white-space: normal; }
-
-  .notes {
-    margin-top: 18px;
-    padding: 16px 18px;
-    background: var(--cream-dark);
-    border-radius: 14px;
-    font-size: 13.5px;
-    line-height: 1.55;
-    color: var(--ink-soft);
-  }
-  .notes-head {
-    font-family: 'Archivo', sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink);
-    margin-bottom: 10px;
-    display: block;
-  }
-  .notes ul { margin: 0; padding-left: 18px; }
-  .notes li { margin-bottom: 6px; }
-  .notes li:last-child { margin-bottom: 0; }
-  .notes strong { color: var(--ink); }
-
-  .footer-brand {
-    margin-top: 24px;
-    padding-top: 18px;
-    border-top: 1.5px solid var(--line);
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-  .footer-brand-name {
-    font-family: 'Archivo', sans-serif;
-    font-weight: 800;
-    font-size: 13px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-  .footer-brand-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-muted);
-    letter-spacing: 0.08em;
-  }
-
-  .page-foot {
-    text-align: center;
-    margin-top: 24px;
-    color: rgba(255,255,255,0.65);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    line-height: 1.7;
-  }
-  .page-foot strong { color: var(--white); }
-
-  /* ===== Wheel Picker Modal ===== */
-  .picker-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 100;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.28s ease;
-  }
+  /* Wheel picker */
+  .picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.28s ease; }
   .picker-overlay.visible { opacity: 1; pointer-events: auto; }
-
-  .picker-sheet {
-    position: fixed;
-    bottom: 0;
-    left: 0; right: 0;
-    background: var(--cream);
-    border-radius: 24px 24px 0 0;
-    z-index: 101;
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    padding-bottom: env(safe-area-inset-bottom);
-    box-shadow: 0 -20px 60px rgba(0,0,0,0.3);
-  }
+  .picker-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--cream); border-radius: 24px 24px 0 0; z-index: 101; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -20px 60px rgba(0,0,0,0.3); }
   .picker-sheet.visible { transform: translateY(0); }
-
-  .handle {
-    width: 38px; height: 4px;
-    background: rgba(10,10,10,0.2);
-    border-radius: 2px;
-    margin: 10px auto 0;
-  }
-
-  .picker-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 20px 10px;
-  }
-  .picker-bar button {
-    background: none; border: none;
-    font-family: 'Archivo', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 6px 4px;
-    cursor: pointer;
-    letter-spacing: 0.04em;
-  }
-  .picker-cancel { color: var(--ink-muted); }
-  .picker-done {
-    color: var(--ink);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .picker-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--ink-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-  }
-
-  .wheels {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr 1.4fr 1.4fr;
-    height: 220px;
-    overflow: hidden;
-    background: var(--white);
-    margin: 6px 16px 20px;
-    border-radius: 16px;
-  }
-
-  .band {
-    position: absolute;
-    left: 0; right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 44px;
-    background: rgba(0,98,173,0.08);
-    border-top: 1.5px solid rgba(0,98,173,0.25);
-    border-bottom: 1.5px solid rgba(0,98,173,0.25);
-    pointer-events: none;
-  }
-
-  .wheel {
-    height: 100%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    scroll-snap-type: y mandatory;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%);
-  }
+  .handle { width: 38px; height: 4px; background: rgba(10,10,10,0.2); border-radius: 2px; margin: 10px auto 0; }
+  .picker-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px 10px; }
+  .picker-bar button { background: none; border: none; font-family: 'Archivo', sans-serif; font-size: 15px; font-weight: 600; padding: 6px 4px; cursor: pointer; letter-spacing: 0.04em; }
+  .picker-cancel { color: var(--bg); }
+  .picker-done { color: var(--ink); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
+  .picker-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.14em; }
+  .wheels { position: relative; display: grid; grid-template-columns: 1fr 1.4fr 1.4fr; height: 220px; overflow: hidden; background: var(--white); margin: 6px 16px 20px; border-radius: 16px; }
+  .band { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 44px; background: rgba(0,98,173,0.08); border-top: 1.5px solid rgba(0,98,173,0.25); border-bottom: 1.5px solid rgba(0,98,173,0.25); pointer-events: none; }
+  .wheel { height: 100%; overflow-y: scroll; overflow-x: hidden; scroll-snap-type: y mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%); }
   .wheel::-webkit-scrollbar { display: none; }
-
   .w-items { padding: 88px 0; }
-  .w-item {
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
-    font-family: 'Archivo', sans-serif;
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--ink-muted);
-    font-variant-numeric: tabular-nums;
-    transition: color 0.12s, font-weight 0.12s;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .w-item.sel {
-    color: var(--ink);
-    font-weight: 800;
-  }
+  .w-item { height: 44px; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; scroll-snap-stop: always; font-family: 'Archivo', sans-serif; font-size: 18px; font-weight: 500; color: var(--ink-muted); font-variant-numeric: tabular-nums; transition: color 0.12s, font-weight 0.12s; user-select: none; -webkit-user-select: none; }
+  .w-item.sel { color: var(--ink); font-weight: 800; }
 </style>
 </head>
 <body>
 
 <div class="page-head">
   <div class="head-top">
-    <div class="eyebrow">Post SV Nürnberg</div>
-    <button type="button" class="menu-btn" id="menuBtn" aria-label="Menü öffnen">
-      <span></span><span></span><span></span>
-    </button>
+    <div class="eyebrow">Post SV Nürnberg · Pass-App</div>
+    <button type="button" class="menu-btn" id="menuBtn" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   </div>
-  <h1 class="page-title">Vereinswechsel<br>Wartezeit</h1>
-  <div class="page-sub">JUGEND · HERREN · FRAUEN</div>
+  <h1 class="page-title">Passantrag</h1>
+  <div class="page-sub">SPIELBERECHTIGUNG</div>
 </div>
 
 <div class="input-card">
+  <div class="section-label">Angaben zum Spieler</div>
+
+  <div class="field">
+    <label class="field-label" for="familienname">Familienname</label>
+    <input class="text-input" id="familienname" type="text" autocomplete="off" autocapitalize="words" placeholder="z. B. Henderson">
+  </div>
+  <div class="field">
+    <label class="field-label" for="vorname">Vorname</label>
+    <input class="text-input" id="vorname" type="text" autocomplete="off" autocapitalize="words" placeholder="z. B. Jakob">
+  </div>
   <div class="field">
     <label class="field-label">Geburtsdatum</label>
     <button type="button" class="date-btn" data-target="geburtsdatum">
-      <span class="val placeholder">Datum wählen</span>
-      <span class="chev">▾</span>
+      <span class="val placeholder">Datum wählen</span><span class="chev">▾</span>
     </button>
+    <div class="field-error" id="err-geburtsdatum">Bitte das Geburtsdatum wählen.</div>
   </div>
-
   <div class="field">
     <label class="field-label">Geschlecht</label>
-    <div class="toggle-row">
+    <div class="toggle-row" id="row-geschlecht">
       <button type="button" class="toggle" data-toggle="geschlecht" data-value="maennlich">♂ Männlich</button>
       <button type="button" class="toggle" data-toggle="geschlecht" data-value="weiblich">♀ Weiblich</button>
     </div>
+    <div class="field-error" id="err-geschlecht">Bitte das Geschlecht wählen.</div>
+  </div>
+  <div class="field">
+    <label class="field-label" for="geburtsort">Geburtsort</label>
+    <input class="text-input" id="geburtsort" type="text" autocomplete="off" autocapitalize="words" placeholder="z. B. Nürnberg">
+  </div>
+  <div class="field">
+    <label class="field-label" for="nationalitaet">Staatsangehörigkeit</label>
+    <input class="text-input" id="nationalitaet" type="text" list="nat-list" autocomplete="off" autocapitalize="none" placeholder="z. B. deutsch">
+    <datalist id="nat-list"></datalist>
   </div>
 
+  <div class="section-label mt">Anschrift</div>
   <div class="field">
-    <label class="field-label">Abmeldedatum</label>
-    <button type="button" class="date-btn" data-target="abmeldung">
-      <span class="val placeholder">Datum wählen</span>
-      <span class="chev">▾</span>
-    </button>
+    <label class="field-label" for="strasse">Straße, Haus-Nr.</label>
+    <input class="text-input" id="strasse" type="text" autocomplete="off" autocapitalize="words" placeholder="z. B. Kirchenberg 3">
   </div>
-
-  <div class="field">
-    <label class="field-label">Letztes Spiel</label>
-    <button type="button" class="date-btn" data-target="letztesSpiel">
-      <span class="val placeholder">Optional</span>
-      <span class="chev">▾</span>
-    </button>
-  </div>
-
-  <div class="field">
-    <label class="field-label">Freigabe / Zustimmung</label>
-    <div class="toggle-row">
-      <button type="button" class="toggle" data-toggle="freigabe" data-value="ja">Ja</button>
-      <button type="button" class="toggle" data-toggle="freigabe" data-value="nein">Nein</button>
+  <div class="field-row">
+    <div class="field">
+      <label class="field-label" for="plz">PLZ</label>
+      <input class="text-input" id="plz" type="text" inputmode="numeric" autocomplete="off" placeholder="90482">
+    </div>
+    <div class="field">
+      <label class="field-label" for="wohnort">Wohnort</label>
+      <input class="text-input" id="wohnort" type="text" autocomplete="off" autocapitalize="words" placeholder="Nürnberg">
     </div>
   </div>
 
-  <button type="button" class="submit" id="calcBtn">Berechnen</button>
+  <div class="section-label mt">Art des Antrags</div>
+  <div class="field">
+    <div class="toggle-row" id="row-antragstyp">
+      <button type="button" class="toggle" data-toggle="antragstyp" data-value="erstausstellung">Erstausstellung</button>
+      <button type="button" class="toggle" data-toggle="antragstyp" data-value="vereinswechsel">Vereinswechsel</button>
+    </div>
+    <div class="field-error" id="err-antragstyp">Bitte Erstausstellung oder Vereinswechsel wählen.</div>
+  </div>
+  <div id="vwFields">
+    <div class="field">
+      <label class="field-label" for="letzterVerein">Letzter Verein</label>
+      <input class="text-input" id="letzterVerein" type="text" autocomplete="off" autocapitalize="words" placeholder="Abgebender Verein">
+    </div>
+    <div class="field">
+      <label class="field-label">Passnummer letzter Verein</label>
+      <div class="passnr-row">
+        <input class="text-input" id="passnummer1" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="xxxx">
+        <span class="passnr-dash">–</span>
+        <input class="text-input" id="passnummer2" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="xxxx">
+      </div>
+    </div>
+  </div>
+
+  <div class="notice" id="docNotice">
+    <div class="notice-title">⚠ Unbedingt beifügen</div>
+    <ul id="docList"></ul>
+  </div>
+
+  <button type="button" class="submit" id="genBtn">Passantrag erstellen</button>
 </div>
 
-<div class="pantone" id="result">
-  <div class="swatch" id="swatch">
-    <div class="swatch-letter" id="swatchLetter">D</div>
+<div class="result" id="result">
+  <div class="result-top" id="resultTop">
+    <div class="result-kicker" id="resKicker">Passantrag erstellt</div>
+    <div class="result-headline" id="resHeadline">Bereit zum Download</div>
   </div>
-  <div class="pantone-body">
-    <h2 class="pantone-title" id="resTitle">D-Jugend</h2>
-    <div class="pantone-sub" id="resSub">JAHRGANG 2014</div>
-
-    <div class="rights">
-      <div class="right-row">
-        <span class="right-label">Privatspielrecht</span>
-        <span class="right-val" id="resPrivat">—</span>
-      </div>
-      <div class="right-row">
-        <span class="right-label">Verbandsspielrecht</span>
-        <span class="right-val" id="resVerband">—</span>
-      </div>
-    </div>
-
-    <div class="notes" id="notes">
-      <span class="notes-head">Hinweise</span>
-      <ul id="notesList"></ul>
-    </div>
-
-    <div class="footer-brand">
-      <span class="footer-brand-name">Post SV Nürnberg</span>
-      <span class="footer-brand-num">6256</span>
-    </div>
+  <div class="result-body">
+    <div class="result-meta" id="resMeta"></div>
+    <a class="dl-btn" id="dlBtn" href="#">PDF herunterladen</a>
   </div>
 </div>
 
 <div class="page-foot">
-  VERSION 2026-06-02-v18
+  POST SV NÜRNBERG · 6256<br>
+  VERSION 2026-06-02-v25
 </div>
 
-<!-- Hamburger-Menü -->
+<!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
 <nav class="menu-panel" id="menuPanel" role="dialog" aria-modal="true" aria-label="Navigationsmenü">
-  <div class="menu-head">
-    <span class="menu-title">Menü</span>
-    <button type="button" class="menu-close" id="menuClose" aria-label="Menü schließen">✕</button>
-  </div>
+  <div class="menu-head"><span class="menu-title">Menü</span><button type="button" class="menu-close" id="menuClose" aria-label="Menü schließen">✕</button></div>
   <div class="menu-links">
-    <!-- LINKS HIER EINFÜGEN. Schema:
-         <a class="menu-link" href="DATEINAME.html">Bezeichnung</a>
-         href kann eine andere Datei im selben Repo sein (z.B. passantrag.html)
-         oder ein externer Link (https://...). -->
-    <a class="menu-link" href="index.html">Wartezeitenrechner</a>
-    <a class="menu-link" href="#" aria-disabled="true">Weitere Tools folgen…</a>
+    <!-- LINKS HIER EINFÜGEN: <a class="menu-link" href="DATEI.html">Bezeichnung</a> -->
+    <a class="menu-link current" href="index.html">Passantrag erstellen</a>
+    <a class="menu-link" href="wartezeit.html">Wartezeitenrechner</a>
   </div>
 </nav>
 
@@ -731,7 +273,7 @@
   <div class="handle"></div>
   <div class="picker-bar">
     <button type="button" class="picker-cancel" id="pCancel">Abbrechen</button>
-    <span class="picker-title" id="pTitle">Datum</span>
+    <span class="picker-title" id="pTitle">Geburtsdatum</span>
     <button type="button" class="picker-done" id="pDone">Fertig</button>
   </div>
   <div class="wheels">
@@ -744,384 +286,295 @@
 
 <script>
 (function() {
-  // === Hamburger-Menü ===
-  const menuBtn = document.getElementById('menuBtn');
-  const menuOverlay = document.getElementById('menuOverlay');
-  const menuPanel = document.getElementById('menuPanel');
-  const menuClose = document.getElementById('menuClose');
-  const openMenu = () => { menuOverlay.classList.add('visible'); menuPanel.classList.add('visible'); };
-  const closeMenu = () => { menuOverlay.classList.remove('visible'); menuPanel.classList.remove('visible'); };
-  menuBtn.addEventListener('click', openMenu);
-  menuClose.addEventListener('click', closeMenu);
-  menuOverlay.addEventListener('click', closeMenu);
-  // Tippen auf einen aktiven Link schließt das Menü (und navigiert dann zur Datei)
-  menuPanel.querySelectorAll('.menu-link:not([aria-disabled="true"])').forEach(a => {
-    a.addEventListener('click', closeMenu);
-  });
-  // ESC schließt Menü (Desktop)
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
-
   const MONTHS = ['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   const IH = 44;
+  const state = { geburtsdatum: null, geschlecht: null, antragstyp: null };
 
-  // Color codes per Altersklasse
-  const COLORS = {
-    A: '#5B1F8B', // purple
-    B: '#E85D04', // orange
-    C: '#C81D25', // red
-    D: '#0062AD', // BFV blue
-    E: '#1B7B47', // green
-    F: '#FFB800', // amber
-    G: '#88B04B', // light green
-    H: '#0A0A0A', // herren black
-    S: '#2A2A2A', // senioren dark
-  };
+  // === Menü ===
+  const menuOverlay = document.getElementById('menuOverlay'), menuPanel = document.getElementById('menuPanel');
+  const openMenu = () => { menuOverlay.classList.add('visible'); menuPanel.classList.add('visible'); };
+  const closeMenu = () => { menuOverlay.classList.remove('visible'); menuPanel.classList.remove('visible'); };
+  document.getElementById('menuBtn').addEventListener('click', openMenu);
+  document.getElementById('menuClose').addEventListener('click', closeMenu);
+  menuOverlay.addEventListener('click', closeMenu);
+  menuPanel.querySelectorAll('.menu-link:not(.current)').forEach(a => a.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 
-  // Dates
-  const SAISON_START_JUGEND = new Date(2026, 7, 1);
-  const SAISON_START_HERREN = new Date(2026, 6, 1);
-  const SAISON_WINTER_START = new Date(2027, 0, 1);
-  const JUG_SOMMER_VON = new Date(2026, 5, 1);
-  const JUG_SOMMER_BIS = new Date(2026, 6, 15);
-  const HERREN_WP1_END = new Date(2026, 5, 30);
-  const HERREN_WP2_END = new Date(2026, 11, 31);
-  const HERREN_NICHTZ_VERBAND = new Date(2026, 10, 1);
-
-  const state = { geburtsdatum: null, abmeldung: null, letztesSpiel: null, freigabe: null, geschlecht: null };
-
-  const dim = (y, m) => new Date(y, m+1, 0).getDate();
-  // addMonths mit Monatsende-Clipping (z.B. 31.05 + 6M = 30.11, nicht 01.12)
-  const addMonths = (d, n) => {
-    const result = new Date(d.getFullYear(), d.getMonth() + n, d.getDate());
-    if (result.getDate() !== d.getDate()) result.setDate(0);
-    return result;
-  };
-  const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate()+n); return r; };
-  const maxD = (...a) => new Date(Math.max(...a.map(x => x.getTime())));
-  const fmtDe = d => `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
-  const fmtBtn = d => `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-
-  // === Wheel picker ===
-  const pov = document.getElementById('pov');
-  const ps = document.getElementById('psheet');
-  const wDay = document.getElementById('wDay'), wMonth = document.getElementById('wMonth'), wYear = document.getElementById('wYear');
-  const wDayI = document.getElementById('wDayI'), wMonthI = document.getElementById('wMonthI'), wYearI = document.getElementById('wYearI');
-  const pTitle = document.getElementById('pTitle');
-
-  let curTarget = null;
-  let yRange = [];
-
-  function build(el, vals) {
-    el.innerHTML = '';
-    vals.forEach((v, i) => {
-      const d = document.createElement('div');
-      d.className = 'w-item';
-      d.textContent = v;
-      d.dataset.idx = i;
-      el.appendChild(d);
-    });
-  }
-  function setIdx(w, i, smooth) {
-    const top = i * IH;
-    if (smooth) w.scrollTo({ top, behavior: 'smooth' });
-    else w.scrollTop = top;
-    upd(w);
-  }
-  const getIdx = w => Math.round(w.scrollTop / IH);
-  function upd(w) {
-    const i = getIdx(w);
-    w.querySelectorAll('.w-item').forEach((el, j) => {
-      el.classList.toggle('sel', j === i);
-    });
-  }
-  function attach(w, onSnap) {
-    let t = null;
-    w.addEventListener('scroll', () => {
-      requestAnimationFrame(() => upd(w));
-      clearTimeout(t);
-      t = setTimeout(() => onSnap && onSnap(getIdx(w)), 130);
-    });
-    w.addEventListener('click', e => {
-      const it = e.target.closest('.w-item');
-      if (!it) return;
-      const i = parseInt(it.dataset.idx, 10);
-      if (!isNaN(i)) setIdx(w, i, true);
-    });
-  }
-  function rebuildDay(y, m, keep) {
-    const n = dim(y, m);
-    const days = [];
-    for (let i = 1; i <= n; i++) days.push(i);
-    build(wDayI, days);
-    setIdx(wDay, Math.min(keep, n) - 1, false);
-  }
-  function open(target) {
-    curTarget = target;
-    pTitle.textContent = ({geburtsdatum:'Geburtsdatum',abmeldung:'Abmeldedatum',letztesSpiel:'Letztes Spiel'})[target];
-    let minY, maxY, def;
-    const today = new Date();
-    if (target === 'geburtsdatum') { minY = 1930; maxY = 2025; def = state.geburtsdatum || new Date(2014, 5, 15); }
-    else if (target === 'abmeldung') { minY = 2024; maxY = 2028; def = state.abmeldung || today; }
-    else { minY = 2024; maxY = 2028; def = state.letztesSpiel || state.abmeldung || today; }
-
-    yRange = [];
-    for (let i = minY; i <= maxY; i++) yRange.push(i);
-    build(wMonthI, MONTHS);
-    build(wYearI, yRange);
-    const y = def.getFullYear(), m = def.getMonth(), d = def.getDate();
-    rebuildDay(y, m, d);
-    setIdx(wMonth, m, false);
-    setIdx(wYear, yRange.indexOf(y), false);
-    pov.classList.add('visible');
-    ps.classList.add('visible');
-  }
-  function close() { pov.classList.remove('visible'); ps.classList.remove('visible'); }
-  function done() {
-    const y = yRange[getIdx(wYear)], m = getIdx(wMonth), d = getIdx(wDay) + 1;
-    const date = new Date(y, m, d);
-    state[curTarget] = date;
-    const btn = document.querySelector(`[data-target="${curTarget}"]`);
-    const val = btn.querySelector('.val');
-    val.textContent = fmtBtn(date);
-    val.classList.remove('placeholder');
-    btn.classList.add('has-value');
-    close();
-  }
-  attach(wDay);
-  attach(wMonth, () => { const yi = getIdx(wYear); if (yRange[yi] !== undefined) rebuildDay(yRange[yi], getIdx(wMonth), getIdx(wDay)+1); });
-  attach(wYear, () => { const yi = getIdx(wYear); if (yRange[yi] !== undefined) rebuildDay(yRange[yi], getIdx(wMonth), getIdx(wDay)+1); });
-  document.querySelectorAll('.date-btn').forEach(b => b.addEventListener('click', () => open(b.dataset.target)));
-  document.getElementById('pCancel').addEventListener('click', close);
-  document.getElementById('pDone').addEventListener('click', done);
-  pov.addEventListener('click', close);
-
-  // === Toggle ===
+  // === Toggles ===
   document.querySelectorAll('.toggle').forEach(b => {
     b.addEventListener('click', () => {
       document.querySelectorAll(`[data-toggle="${b.dataset.toggle}"]`).forEach(x => x.classList.remove('on'));
       b.classList.add('on');
       state[b.dataset.toggle] = b.dataset.value;
+      // Fehlerzustand der Gruppe zurücksetzen
+      const row = document.getElementById('row-' + b.dataset.toggle);
+      if (row) row.classList.remove('invalid');
+      const err = document.getElementById('err-' + b.dataset.toggle);
+      if (err) err.classList.remove('show');
+      if (b.dataset.toggle === 'antragstyp') {
+        const isVW = b.dataset.value === 'vereinswechsel';
+        document.getElementById('vwFields').classList.toggle('visible', isVW);
+        if (!isVW) { const lv=document.getElementById('letzterVerein'); lv.classList.remove('invalid'); const le=document.getElementById('err-letzterVerein'); if(le) le.classList.remove('show'); }
+        updateDocNotice();
+      }
     });
   });
 
-  // === Altersklasse ===
-  // Saison läuft 01.07. - 30.06. (gemäß BFV-Spielordnung)
-  function getSaison(date) {
-    if (date.getMonth() >= 6) return { start: date.getFullYear(), end: date.getFullYear() + 1 };
-    return { start: date.getFullYear() - 1, end: date.getFullYear() };
+  // === Datumshelfer ===
+  const dim = (y, m) => new Date(y, m+1, 0).getDate();
+  const fmtDe = d => `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+  const fmtBtn = d => `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  function getSaison(date) { if (date.getMonth() >= 6) return { start: date.getFullYear(), end: date.getFullYear()+1 }; return { start: date.getFullYear()-1, end: date.getFullYear() }; }
+
+  // === Wheel Picker ===
+  const pov = document.getElementById('pov'), ps = document.getElementById('psheet');
+  const wDay = document.getElementById('wDay'), wMonth = document.getElementById('wMonth'), wYear = document.getElementById('wYear');
+  const wDayI = document.getElementById('wDayI'), wMonthI = document.getElementById('wMonthI'), wYearI = document.getElementById('wYearI');
+  let yRange = [];
+  function build(el, vals) { el.innerHTML=''; vals.forEach((v,i)=>{ const d=document.createElement('div'); d.className='w-item'; d.textContent=v; d.dataset.idx=i; el.appendChild(d); }); }
+  function setIdx(w,i,smooth){ const top=i*IH; if(smooth) w.scrollTo({top,behavior:'smooth'}); else w.scrollTop=top; upd(w); }
+  const getIdx = w => Math.round(w.scrollTop/IH);
+  function upd(w){ const i=getIdx(w); w.querySelectorAll('.w-item').forEach((el,j)=>el.classList.toggle('sel',j===i)); }
+  function attach(w,onSnap){ let t=null; w.addEventListener('scroll',()=>{ requestAnimationFrame(()=>upd(w)); clearTimeout(t); t=setTimeout(()=>onSnap&&onSnap(getIdx(w)),130); }); w.addEventListener('click',e=>{ const it=e.target.closest('.w-item'); if(!it)return; const i=parseInt(it.dataset.idx,10); if(!isNaN(i)) setIdx(w,i,true); }); }
+  function rebuildDay(y,m,keep){ const n=dim(y,m); const days=[]; for(let i=1;i<=n;i++)days.push(i); build(wDayI,days); setIdx(wDay,Math.min(keep,n)-1,false); }
+  function openPicker(){
+    const def = state.geburtsdatum || new Date(2014,5,15);
+    yRange=[]; for(let i=1930;i<=2025;i++)yRange.push(i);
+    build(wMonthI, MONTHS); build(wYearI, yRange);
+    const y=def.getFullYear(), m=def.getMonth(), d=def.getDate();
+    rebuildDay(y,m,d); setIdx(wMonth,m,false); setIdx(wYear,yRange.indexOf(y),false);
+    pov.classList.add('visible'); ps.classList.add('visible');
+  }
+  function closePicker(){ pov.classList.remove('visible'); ps.classList.remove('visible'); }
+  function donePicker(){
+    const y=yRange[getIdx(wYear)], m=getIdx(wMonth), d=getIdx(wDay)+1;
+    state.geburtsdatum = new Date(y,m,d);
+    const btn=document.querySelector('[data-target="geburtsdatum"]'); const val=btn.querySelector('.val');
+    val.textContent = fmtBtn(state.geburtsdatum); val.classList.remove('placeholder'); btn.classList.add('has-value');
+    btn.classList.remove('invalid');
+    const de = document.getElementById('err-geburtsdatum'); if (de) de.classList.remove('show');
+    updateDocNotice();
+    closePicker();
+  }
+  attach(wDay);
+  attach(wMonth,()=>{ const yi=getIdx(wYear); if(yRange[yi]!==undefined) rebuildDay(yRange[yi],getIdx(wMonth),getIdx(wDay)+1); });
+  attach(wYear,()=>{ const yi=getIdx(wYear); if(yRange[yi]!==undefined) rebuildDay(yRange[yi],getIdx(wMonth),getIdx(wDay)+1); });
+  document.querySelector('[data-target="geburtsdatum"]').addEventListener('click', openPicker);
+  document.getElementById('pCancel').addEventListener('click', closePicker);
+  document.getElementById('pDone').addEventListener('click', donePicker);
+  pov.addEventListener('click', closePicker);
+
+  // === Formularwahl: Jugend vs. Senioren ===
+  // Junioren (U19 m / U17 w und jünger, inkl. älterer A / ältere B) → Jugend-Formular
+  // sonst → Senioren-Formular (Herren/Frauen)
+  function getFormular(geburtsdatum, geschlecht) {
+    const s = getSaison(new Date());
+    const u = s.end - geburtsdatum.getFullYear();
+    if (geschlecht === 'weiblich') return u <= 17 ? 'jugend' : 'senioren';
+    return u <= 19 ? 'jugend' : 'senioren';
   }
 
-  // Altersklasse anhand Geburtsjahr, Abmeldedatum UND Geschlecht
-  // Juniorinnen: keine A-Juniorinnen — ältere B-Juniorin (U17) bereits passrechtlich wie Frauen
-  function getAK(jahr, abmeldungDate, geschlecht) {
-    const saison = getSaison(abmeldungDate);
-    const u = saison.end - jahr;
+  function val(id){ return (document.getElementById(id).value || '').trim(); }
 
-    if (geschlecht === 'weiblich') {
-      // Mädchen / Frauen
-      if (u >= 17) {
-        let label, letter;
-        if (u === 17) { label = 'B-Juniorinnen (älter) · Frauenrecht'; letter = 'B'; }
-        else if (u >= 30 && u < 40) { label = 'Frauen Ü30'; letter = 'S'; }
-        else if (u >= 40 && u < 50) { label = 'Frauen Ü40'; letter = 'S'; }
-        else if (u >= 50) { label = 'Frauen Ü' + (Math.floor(u/10)*10); letter = 'S'; }
-        else { label = 'Frauen'; letter = 'F'; }
-        return { name: label, kat: 'herren', verband: true, letter, kuerzel: letter, saison, geschlecht };
-      }
-      if (u === 16) return { name: 'B-Juniorinnen (jünger)', kat: 'jugend', verband: true, letter: 'B', kuerzel: 'B', saison, geschlecht };
-      if (u === 15) return { name: 'C-Juniorinnen (älter)', kat: 'jugend', verband: true, letter: 'C', kuerzel: 'C', saison, geschlecht };
-      if (u === 14) return { name: 'C-Juniorinnen (jünger)', kat: 'jugend', verband: true, letter: 'C', kuerzel: 'C', saison, geschlecht };
-      if (u === 13) return { name: 'D-Juniorinnen (älter)', kat: 'jugend', verband: true, letter: 'D', kuerzel: 'D', saison, geschlecht };
-      if (u === 12) return { name: 'D-Juniorinnen (jünger)', kat: 'jugend', verband: true, letter: 'D', kuerzel: 'D', saison, geschlecht };
-      if (u === 11) return { name: 'E-Juniorinnen (älter)', kat: 'jugend', verband: false, letter: 'E', kuerzel: 'E', saison, geschlecht };
-      if (u === 10) return { name: 'E-Juniorinnen (jünger)', kat: 'jugend', verband: false, letter: 'E', kuerzel: 'E', saison, geschlecht };
-      if (u === 9) return { name: 'F-Juniorinnen (älter)', kat: 'jugend', verband: false, letter: 'F', kuerzel: 'F', saison, geschlecht };
-      if (u === 8) return { name: 'F-Juniorinnen (jünger)', kat: 'jugend', verband: false, letter: 'F', kuerzel: 'F', saison, geschlecht };
-      if (u <= 7) return { name: 'G-Juniorinnen / Bambini', kat: 'jugend', verband: false, letter: 'G', kuerzel: 'G', saison, geschlecht };
-      return null;
-    }
+  // === Validierung ===
+  const NATIONALITIES = ['deutsch','österreichisch','schweizerisch','französisch','italienisch','spanisch','portugiesisch','niederländisch','belgisch','luxemburgisch','dänisch','schwedisch','norwegisch','finnisch','isländisch','britisch','irisch','polnisch','tschechisch','slowakisch','ungarisch','rumänisch','bulgarisch','griechisch','kroatisch','slowenisch','serbisch','bosnisch','montenegrinisch','mazedonisch','albanisch','kosovarisch','türkisch','russisch','ukrainisch','belarussisch','litauisch','lettisch','estnisch','moldauisch','georgisch','armenisch','aserbaidschanisch','kasachisch','amerikanisch','US-amerikanisch','kanadisch','mexikanisch','brasilianisch','argentinisch','chilenisch','kolumbianisch','marokkanisch','algerisch','tunesisch','ägyptisch','nigerianisch','ghanaisch','kamerunisch','senegalesisch','südafrikanisch','äthiopisch','kenianisch','chinesisch','japanisch','koreanisch','vietnamesisch','thailändisch','indisch','pakistanisch','bangladeschisch','indonesisch','philippinisch','iranisch','irakisch','syrisch','libanesisch','israelisch','afghanisch','australisch','neuseeländisch'];
+  (function fillNatList(){ const dl=document.getElementById('nat-list'); NATIONALITIES.forEach(n=>{ const o=document.createElement('option'); o.value=n; dl.appendChild(o); }); })();
 
-    // Jungs / Herren (Default)
-    if (u >= 19) {
-      let label, letter;
-      if (u === 19) { label = 'A-Jugend / Herrenrecht'; letter = 'A'; }
-      else if (u >= 32 && u < 40) { label = 'Senioren Ü32'; letter = 'S'; }
-      else if (u >= 40 && u < 50) { label = 'Senioren Ü40'; letter = 'S'; }
-      else if (u >= 50) { label = 'Senioren Ü' + (Math.floor(u/10)*10); letter = 'S'; }
-      else { label = 'Herren'; letter = 'H'; }
-      return { name: label, kat: 'herren', verband: true, letter, kuerzel: letter, saison, geschlecht };
-    }
-    if (u === 18) return { name: 'A-Jugend (jünger)', kat: 'jugend', verband: true, letter: 'A', kuerzel: 'A', saison, geschlecht };
-    if (u === 17) return { name: 'B-Jugend (älter)', kat: 'jugend', verband: true, letter: 'B', kuerzel: 'B', saison, geschlecht };
-    if (u === 16) return { name: 'B-Jugend (jünger)', kat: 'jugend', verband: true, letter: 'B', kuerzel: 'B', saison, geschlecht };
-    if (u === 15) return { name: 'C-Jugend (älter)', kat: 'jugend', verband: true, letter: 'C', kuerzel: 'C', saison, geschlecht };
-    if (u === 14) return { name: 'C-Jugend (jünger)', kat: 'jugend', verband: true, letter: 'C', kuerzel: 'C', saison, geschlecht };
-    if (u === 13) return { name: 'D-Jugend (älter)', kat: 'jugend', verband: true, letter: 'D', kuerzel: 'D', saison, geschlecht };
-    if (u === 12) return { name: 'D-Jugend (jünger)', kat: 'jugend', verband: true, letter: 'D', kuerzel: 'D', saison, geschlecht };
-    if (u === 11) return { name: 'E-Jugend (älter)', kat: 'jugend', verband: false, letter: 'E', kuerzel: 'E', saison, geschlecht };
-    if (u === 10) return { name: 'E-Jugend (jünger)', kat: 'jugend', verband: false, letter: 'E', kuerzel: 'E', saison, geschlecht };
-    if (u === 9) return { name: 'F-Jugend (älter)', kat: 'jugend', verband: false, letter: 'F', kuerzel: 'F', saison, geschlecht };
-    if (u === 8) return { name: 'F-Jugend (jünger)', kat: 'jugend', verband: false, letter: 'F', kuerzel: 'F', saison, geschlecht };
-    if (u <= 7) return { name: 'G-Jugend / Bambini', kat: 'jugend', verband: false, letter: 'G', kuerzel: 'G', saison, geschlecht };
-    return null;
-  }
+  const hasDigit = s => /\d/.test(s);
+  const hasLetter = s => /[A-Za-zÄÖÜäöüß]/.test(s);
+  const isText = s => s.length >= 2 && hasLetter(s) && !hasDigit(s);              // Name/Ort: Buchstaben, keine Ziffern
+  const isAddress = s => hasLetter(s) && hasDigit(s) && s.length >= 4;            // Straße + Hausnummer
+  const isPLZ = s => /^\d{5}$/.test(s);                                           // genau 5 Ziffern
+  const isNationality = s => { const v=s.toLowerCase(); if(!v||hasDigit(v))return false; if(NATIONALITIES.map(n=>n.toLowerCase()).includes(v))return true; return /sch$/.test(v); };
 
-  // === Berechnung Jugend ===
-  function calcJ(ak, ab, ls, f) {
-    const tA = addDays(ab, 1);
-    const tL = ls ? addDays(ls, 1) : null;
-    const inSommer = ab >= JUG_SOMMER_VON && ab <= JUG_SOMMER_BIS;
+  const FIELD_VALIDATORS = {
+    familienname: { test: isText,        msg: 'Bitte einen gültigen Namen eingeben (keine Zahlen).' },
+    vorname:      { test: isText,        msg: 'Bitte einen gültigen Vornamen eingeben (keine Zahlen).' },
+    geburtsort:   { test: isText,        msg: 'Bitte einen gültigen Geburtsort eingeben (keine Zahlen).' },
+    nationalitaet:{ test: isNationality, msg: 'Bitte eine gültige Staatsangehörigkeit eingeben (z. B. deutsch) — kein Ort.' },
+    strasse:      { test: isAddress,     msg: 'Bitte Straße und Hausnummer eingeben (z. B. Kirchenberg 3).' },
+    plz:          { test: isPLZ,         msg: 'Die PLZ muss aus genau 5 Ziffern bestehen.' },
+    wohnort:      { test: isText,        msg: 'Bitte einen gültigen Wohnort eingeben (keine Zahlen).' },
+  };
 
-    // Wegfall der Wartefrist bei 6 Monaten Spielpause — gilt auch in der Jugend
-    const inaktivDatum = ls ? addDays(addMonths(ls, 6), 1) : null;
-    const inaktivSpielrecht = inaktivDatum ? maxD(inaktivDatum, tA) : null;
-
-    // Privatspielrecht (Freundschaftsspiele): immer ab Antragseingang — nicht ab Saisonstart
-    let pri = tA;
-    let ver = null, hin = [];
-
-    if (!ak.verband) {
-      ver = 'KEINE';
-      hin.push('Im Minifußball (E-, F-, G-Jugend) reicht das Privatspielrecht für Meisterschaftsspiele. <strong>Keine Wartezeit.</strong>');
-      hin.push('Privatspielrecht ab Eingang der vollständigen Unterlagen beim BFV — sofort spielberechtigt.');
-      return { pri, ver, hin };
-    }
-
-    // Reguläre Berechnung
-    if (inSommer) {
-      if (f === 'ja') {
-        ver = SAISON_START_JUGEND;
-        hin.push('<strong>Sommerwechsel mit Freigabe:</strong> Verbandsspielrecht ab 01.08.2026 (Saisonstart).');
-        hin.push('Passantrag-Eingang bis spätestens <strong>30.09.2026</strong>.');
-      } else {
-        let we = addMonths(tA, 3);
-        if (tL && ls > ab) { we = maxD(we, addMonths(tL, 3)); hin.push('Wartezeit verlängert, da letztes Spiel nach Abmeldung lag.'); }
-        ver = maxD(we, SAISON_START_JUGEND);
-        hin.push('<strong>Sommerwechsel ohne Freigabe:</strong> 3 Monate Wartezeit ab Tag nach Abmeldung.');
-      }
-    } else {
-      const mn = f === 'ja' ? 3 : 6;
-      let we = addMonths(tA, mn);
-      if (tL && ls > ab) { we = maxD(we, addMonths(tL, mn)); hin.push('Wartezeit verlängert, da letztes Spiel nach Abmeldung lag.'); }
-      ver = we;
-      if (f === 'ja') hin.push('<strong>Wechsel während Spieljahr mit Freigabe:</strong> 3 Monate Wartezeit ab Tag nach Abmeldung.');
-      else hin.push('<strong>Wechsel während Spieljahr ohne Freigabe:</strong> 6 Monate Wartezeit ab Tag nach Abmeldung.');
-    }
-
-    // Wegfall der Wartefrist: gewinnt bei früherer 6-Monats-Inaktivität.
-    // Reguläre Hinweise werden ersetzt, da sie sonst widersprüchlich wären.
-    if (inaktivSpielrecht && inaktivSpielrecht < ver) {
-      const regulaer = fmtDe(ver);
-      ver = inaktivSpielrecht;
-      hin = [
-        '<strong>Wegfall der Wartefrist:</strong> Spieler ist seit letztem Spiel durchgehend 6 Monate inaktiv → Verbandsspielrecht ab <strong>' + fmtDe(inaktivSpielrecht) + '</strong>. Nachweis der Spielpause beilegen.',
-        'Die reguläre Wartezeit (bis ' + regulaer + ') entfällt dadurch.'
-      ];
-    }
-
-    return { pri, ver, hin };
-  }
-
-  // === Berechnung Herren/Frauen ===
-  function calcH(ab, ls, f, geschlecht) {
-    const tA = addDays(ab, 1); // Tag nach Abmeldung ≈ Antragseingang
-    const inWP1 = ab <= HERREN_WP1_END;
-    const inWP2 = ab > HERREN_WP1_END && ab <= HERREN_WP2_END;
-    const paragraph = geschlecht === 'weiblich' ? '§ 39 FMO' : '§ 44 SpO';
-
-    // § 44 Nr. 2: "nach Ablauf von sechs Monaten, gerechnet ab dem zuletzt gespielten Spiel"
-    // BFV-Praxis: letztes Spiel + 6 Monate, spielberechtigt am Tag NACH Ablauf (+1 Tag).
-    // Frühestens jedoch ab Antragseingang (man kann nicht vor Anmeldung spielen).
-    const inaktivDatum = ls ? addDays(addMonths(ls, 6), 1) : null;
-    const inaktivSpielrecht = inaktivDatum ? maxD(inaktivDatum, tA) : null;
-
-    // Privatspielrecht (Freundschaftsspiele): immer ab Antragseingang
-    let pri = tA;
-    let ver = null, hin = [];
-
-    if (inWP1) {
-      if (f === 'ja') {
-        ver = maxD(tA, SAISON_START_HERREN);
-        hin.push('<strong>WP I (Sommer) mit Zustimmung:</strong> Verbandsspielrecht ab Eingang, frühestens 01.07.2026.');
-        hin.push('Passantrag-Eingang bis spätestens <strong>31.08.2026</strong>.');
-      } else {
-        ver = HERREN_NICHTZ_VERBAND; // 01.11.2026
-        hin.push('<strong>WP I ohne Zustimmung:</strong> Pflichtspielrecht ab festem Stichtag <strong>01.11.2026</strong> (§ 42 Nr. 3).');
-        hin.push('Alternative: Ausbildungsentschädigung zahlen → ersetzt fehlende Zustimmung (bis 31.08.2026).');
-      }
-    } else if (inWP2) {
-      if (f === 'ja') {
-        ver = maxD(tA, SAISON_WINTER_START);
-        hin.push('<strong>WP II (Winter) mit Zustimmung:</strong> Verbandsspielrecht ab Eingang, frühestens 01.01.2027.');
-        hin.push('Passantrag-Eingang bis spätestens <strong>31.01.2027</strong>.');
-        hin.push('In WP II keine Ausbildungsentschädigung als Zustimmungsersatz möglich (§ 43 Nr. 4).');
-      } else {
-        ver = new Date(2027, 10, 1); // 01.11.2027
-        hin.push('<strong>WP II ohne Zustimmung:</strong> Verbandsspielrecht frühestens zum <strong>01.11.2027</strong> (01.11. des folgenden Spieljahres, § 43 Nr. 3).');
-        hin.push('In WP II keine Ausbildungsentschädigung als Zustimmungsersatz möglich (§ 43 Nr. 4).');
-      }
-    } else {
-      // Außerhalb beider Wechselperioden
-      ver = 'INAKTIV';
-      hin.push('<strong>Außerhalb der Wechselperioden:</strong> Privatspielrecht sofort ab Antragseingang. Verbandsspielrecht nur über Inaktivität (' + paragraph + ' Nr. 2) oder Warten auf nächste WP I.');
-    }
-
-    // § 44 Nr. 2 "bleibt unberührt": Der Inaktivitäts-Wegfall greift in ALLEN Fällen
-    // (auch mit Zustimmung, auch in WP II) und gewinnt, wenn er ein früheres Datum ergibt.
-    // Reguläre Hinweise werden dann ersetzt, da sie sonst widersprüchlich wären.
-    if (inaktivSpielrecht && (ver === 'INAKTIV' || inaktivSpielrecht < ver)) {
-      const regulaer = (ver === 'INAKTIV') ? null : fmtDe(ver);
-      ver = inaktivSpielrecht;
-      hin = [
-        '<strong>Wegfall der Wartefrist (' + paragraph + ' Nr. 2):</strong> Spieler ist seit letztem Spiel durchgehend 6 Monate inaktiv → Verbandsspielrecht ab <strong>' + fmtDe(inaktivSpielrecht) + '</strong>. Nachweis der Spielpause (alle Spiele inkl. Freundschaftsspiele) beilegen.'
-      ];
-      if (regulaer) hin.push('Die reguläre Frist (bis ' + regulaer + ') entfällt dadurch.');
-    }
-
-    return { pri, ver, hin };
-  }
-
-  // === Submit ===
-  document.getElementById('calcBtn').addEventListener('click', () => {
-    if (!state.geburtsdatum) { alert('Bitte Geburtsdatum wählen.'); return; }
-    if (!state.geschlecht) { alert('Bitte Geschlecht wählen.'); return; }
-    if (!state.abmeldung) { alert('Bitte Abmeldedatum wählen.'); return; }
-    if (!state.freigabe) { alert('Bitte Freigabe Ja/Nein wählen.'); return; }
-
-    const jahr = state.geburtsdatum.getFullYear();
-    const ak = getAK(jahr, state.abmeldung, state.geschlecht);
-    if (!ak) { alert('Geburtsjahr außerhalb des berechenbaren Bereichs.'); return; }
-
-    const r = ak.kat === 'herren'
-      ? calcH(state.abmeldung, state.letztesSpiel, state.freigabe, state.geschlecht)
-      : calcJ(ak, state.abmeldung, state.letztesSpiel, state.freigabe);
-
-    // Render
-    const color = COLORS[ak.kuerzel] || COLORS.D;
-    document.getElementById('swatch').style.setProperty('--swatch-color', color);
-
-    const letterEl = document.getElementById('swatchLetter');
-    letterEl.textContent = ak.letter;
-    letterEl.classList.toggle('compact', ak.letter.length > 1);
-
-    document.getElementById('resTitle').textContent = ak.name;
-    document.getElementById('resSub').textContent = 'JAHRGANG ' + jahr;
-    document.getElementById('resPrivat').textContent = fmtDe(r.pri);
-    document.getElementById('resPrivat').className = 'right-val';
-
-    const ve = document.getElementById('resVerband');
-    ve.className = 'right-val';
-    if (r.ver === 'KEINE') { ve.textContent = 'nicht erforderlich'; ve.classList.add('muted'); }
-    else if (r.ver === 'INAKTIV') { ve.textContent = 'nur nach 6 Mon. Spielpause'; ve.classList.add('warn'); }
-    else ve.textContent = fmtDe(r.ver);
-
-    const nl = document.getElementById('notesList');
-    nl.innerHTML = r.hin.map(h => '<li>' + h + '</li>').join('');
-
-    const res = document.getElementById('result');
-    res.classList.add('visible');
-    setTimeout(() => res.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  // Inline-Fehlermeldungen anlegen + bei Eingabe zurücksetzen
+  Object.keys(FIELD_VALIDATORS).forEach(id => {
+    const el = document.getElementById(id);
+    const err = document.createElement('div');
+    err.className = 'field-error'; err.id = 'err-' + id; err.textContent = FIELD_VALIDATORS[id].msg;
+    el.closest('.field').appendChild(err);
+    el.addEventListener('input', () => { el.classList.remove('invalid'); err.classList.remove('show'); });
   });
+  // Letzter Verein: nur Pflicht (Ziffern erlaubt, z. B. TSV 1860)
+  (function(){ const el=document.getElementById('letzterVerein'); const err=document.createElement('div'); err.className='field-error'; err.id='err-letzterVerein'; err.textContent='Bitte den letzten Verein angeben.'; el.closest('.field').appendChild(err); el.addEventListener('input',()=>{ el.classList.remove('invalid'); err.classList.remove('show'); }); })();
+
+  function showFieldError(id){ const el=document.getElementById(id); if(el) el.classList.add('invalid'); const e=document.getElementById('err-'+id); if(e) e.classList.add('show'); return el; }
+
+  // Nationalität-Eingabe aktualisiert auch die Unterlagen-Hinweise
+  document.getElementById('nationalitaet').addEventListener('input', () => { updateDocNotice(); });
+
+  // === Beizufügende Unterlagen (dynamisch) ===
+  function ageYears(birth){ const t=new Date(); let a=t.getFullYear()-birth.getFullYear(); const m=t.getMonth()-birth.getMonth(); if(m<0||(m===0&&t.getDate()<birth.getDate())) a--; return a; }
+  function buildDocs(){
+    const docs=[];
+    if (state.antragstyp !== 'erstausstellung') return docs; // Hinweis nur bei Erstausstellung
+    docs.push('Kopie des <strong>Reisepasses / Personalausweises</strong> des Spielers / der Spielerin.');
+    const nat = val('nationalitaet').toLowerCase();
+    if (nat && nat !== 'deutsch' && state.geburtsdatum && ageYears(state.geburtsdatum) >= 10)
+      docs.push('<strong>Meldebescheinigung</strong> des Spielers / der Spielerin bzw. der Eltern (nicht-deutsche Staatsangehörigkeit ab 10 Jahren).');
+    return docs;
+  }
+  function updateDocNotice(){
+    const docs = buildDocs();
+    const box = document.getElementById('docNotice'), list = document.getElementById('docList');
+    if (docs.length){ list.innerHTML = docs.map(d => '<li>'+d+'</li>').join(''); box.classList.add('show'); }
+    else box.classList.remove('show');
+  }
+
+  // === PDF erzeugen ===
+  const result = document.getElementById('result');
+  const genBtn = document.getElementById('genBtn');
+
+  async function generate() {
+    // Validierung: Pflicht + Format
+    let firstInvalid = null;
+    const problems = [];
+
+    for (const id in FIELD_VALIDATORS) {
+      const v = val(id);
+      if (!v || !FIELD_VALIDATORS[id].test(v)) {
+        const el = showFieldError(id);
+        if (!firstInvalid) firstInvalid = el;
+        problems.push(id);
+      }
+    }
+    if (!state.geburtsdatum) {
+      const el = document.querySelector('[data-target="geburtsdatum"]'); el.classList.add('invalid');
+      document.getElementById('err-geburtsdatum').classList.add('show');
+      if (!firstInvalid) firstInvalid = el; problems.push('Geburtsdatum');
+    }
+    if (!state.geschlecht) {
+      document.getElementById('row-geschlecht').classList.add('invalid');
+      document.getElementById('err-geschlecht').classList.add('show');
+      if (!firstInvalid) firstInvalid = document.getElementById('row-geschlecht'); problems.push('Geschlecht');
+    }
+    if (!state.antragstyp) {
+      document.getElementById('row-antragstyp').classList.add('invalid');
+      document.getElementById('err-antragstyp').classList.add('show');
+      if (!firstInvalid) firstInvalid = document.getElementById('row-antragstyp'); problems.push('Art des Antrags');
+    }
+
+    if (state.antragstyp === 'vereinswechsel') {
+      if (!val('letzterVerein')) { const el = showFieldError('letzterVerein'); if (!firstInvalid) firstInvalid = el; problems.push('Letzter Verein'); }
+      const p1 = val('passnummer1'), p2 = val('passnummer2');
+      if ((p1 || p2) && !(p1.length === 4 && p2.length === 4)) {
+        document.getElementById('passnummer1').classList.add('invalid');
+        document.getElementById('passnummer2').classList.add('invalid');
+        problems.push('Passnummer (je 4 Ziffern)');
+      }
+    }
+
+    if (problems.length) {
+      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    genBtn.disabled = true; genBtn.textContent = 'Erstelle PDF…';
+    try {
+      const formular = getFormular(state.geburtsdatum, state.geschlecht);
+      const file = formular === 'jugend' ? 'passantrag_jugend.pdf' : 'passantrag_senioren.pdf';
+      const bytes = await fetch(file).then(r => { if(!r.ok) throw new Error('PDF-Vorlage nicht gefunden: '+file); return r.arrayBuffer(); });
+
+      const { PDFDocument, StandardFonts } = PDFLib;
+      const doc = await PDFDocument.load(bytes);
+      const form = doc.getForm();
+      const helv = await doc.embedFont(StandardFonts.Helvetica);
+
+      const setT = (name, value) => { try { form.getTextField(name).setText(value || ''); } catch(e){} };
+      const gd = fmtDe(state.geburtsdatum);
+
+      setT('Vereinsnummer 4stellig', '6256');
+      setT('Vereinsname', 'Post SV Nürnberg e.V.');
+      setT('Familienname', val('familienname'));
+      setT('Vorname', val('vorname'));
+      setT('Geburtsdatum', gd);
+      setT('Geburtsort', val('geburtsort'));
+      setT('Staatsangehörigkeit siehe auch nächste Seite', val('nationalitaet'));
+      setT('Straße HausNr', val('strasse'));
+      setT('PLZ', val('plz'));
+      setT('Wohnort', val('wohnort'));
+      if (state.antragstyp === 'vereinswechsel') {
+        setT('Letzter Verein', val('letzterVerein'));
+        const pn1 = val('passnummer1'), pn2 = val('passnummer2');
+        if (pn1) setT('Passnummer1', pn1);
+        if (pn2) setT('Passnummer2', pn2);
+      }
+
+      // Geschlecht (Group1) — robust über Teilstring, da ä-Encoding variiert
+      try {
+        const g1 = form.getRadioGroup('Group1');
+        const opts = g1.getOptions();
+        const target = state.geschlecht === 'weiblich'
+          ? opts.find(o => o.toLowerCase().includes('weib'))
+          : opts.find(o => o.toLowerCase().includes('weib') === false);
+        if (target) g1.select(target);
+      } catch(e){}
+
+      // Antragstyp (Group2): Jugend 1=Erst,2=Wechsel | Senioren 2=Erst,5=Wechsel
+      try {
+        const g2 = form.getRadioGroup('Group2');
+        let v;
+        if (formular === 'jugend') v = state.antragstyp === 'erstausstellung' ? '1' : '2';
+        else v = state.antragstyp === 'erstausstellung' ? '2' : '5';
+        g2.select(v);
+      } catch(e){}
+
+      form.updateFieldAppearances(helv);
+      const out = await doc.save();
+
+      const blob = new Blob([out], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const fname = `Passantrag_${val('familienname')}_${val('vorname')}.pdf`.replace(/\s+/g,'_');
+      const dl = document.getElementById('dlBtn');
+      dl.href = url; dl.setAttribute('download', fname);
+
+      document.getElementById('resultTop').classList.remove('error');
+      document.getElementById('resKicker').textContent = (formular === 'jugend' ? 'Jugend' : 'Senioren') + '-Passantrag erstellt';
+      document.getElementById('resHeadline').textContent = val('vorname') + ' ' + val('familienname');
+      const docs = buildDocs();
+      const docsHtml = docs.length ? '<br><br><strong>Unbedingt beifügen:</strong><br>• ' + docs.join('<br>• ') : '';
+      document.getElementById('resMeta').innerHTML =
+        'Formular: <strong>' + (formular === 'jugend' ? 'Junioren / Juniorinnen' : 'Herren / Senioren / Frauen') + '</strong><br>' +
+        'Art: <strong>' + (state.antragstyp === 'erstausstellung' ? 'Erstausstellung' : 'Vereinswechsel') + '</strong><br>' +
+        'Seite 3 (Einverständniserklärung) ist mit ausgefüllt. Anschließend zur Unterschrift an den Spieler weiterleiten.' + docsHtml;
+      result.classList.add('visible');
+      setTimeout(() => result.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    } catch (err) {
+      document.getElementById('resultTop').classList.add('error');
+      document.getElementById('resKicker').textContent = 'Fehler';
+      document.getElementById('resHeadline').textContent = 'PDF nicht erstellt';
+      document.getElementById('resMeta').textContent = (err && err.message) ? err.message : 'Unbekannter Fehler. Sind die PDF-Vorlagen im Repo vorhanden?';
+      document.getElementById('dlBtn').style.display = 'none';
+      result.classList.add('visible');
+      setTimeout(() => result.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    } finally {
+      genBtn.disabled = false; genBtn.textContent = 'Passantrag erstellen';
+    }
+  }
+  genBtn.addEventListener('click', generate);
+
+  // Passnummer: Auto-Sprung von Feld 1 zu Feld 2 nach 4 Ziffern
+  const pn1El = document.getElementById('passnummer1'), pn2El = document.getElementById('passnummer2');
+  if (pn1El && pn2El) {
+    pn1El.addEventListener('input', () => {
+      pn1El.value = pn1El.value.replace(/\D/g,'').slice(0,4);
+      if (pn1El.value.length === 4) pn2El.focus();
+    });
+    pn2El.addEventListener('input', () => { pn2El.value = pn2El.value.replace(/\D/g,'').slice(0,4); });
+  }
+  // PLZ nur Ziffern
+  const plzEl = document.getElementById('plz');
+  if (plzEl) plzEl.addEventListener('input', () => { plzEl.value = plzEl.value.replace(/\D/g,'').slice(0,5); });
 })();
 </script>
 </body>
