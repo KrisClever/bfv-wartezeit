@@ -292,7 +292,7 @@
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2.9.5 · 04.06.2026</div>
+  VERSION 2.9.6 · 04.06.2026</div>
 
 <!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -724,10 +724,17 @@
         const gsel = document.getElementById('wechselgrund');
         if (gsel.value !== '') grundHtml = '<br>Wechselgrund: <strong>' + gsel.options[gsel.selectedIndex].text + '</strong>';
       }
+      // Abschluss-Text: gegendert + altersabhängig + antragsabhängig
+      const anWen = ctx.adult
+        ? (ctx.female ? 'an die Spielerin'                   : 'an den Spieler')
+        : (ctx.female ? 'an die Spielerin / Erziehungsberechtigte' : 'an den Spieler / Erziehungsberechtigten');
+      const abschluss = state.antragstyp === 'vereinswechsel'
+        ? 'Seite 3 (Einverständniserklärung) ist mit ausgefüllt. Bitte ' + anWen + ' zur Unterschrift weiterleiten.'
+        : 'Bitte ' + anWen + ' zur Unterschrift weiterleiten.';
       document.getElementById('resMeta').innerHTML =
         'Formular: <strong>' + (formular === 'jugend' ? 'Junioren / Juniorinnen' : 'Herren / Senioren / Frauen') + '</strong><br>' +
         'Art: <strong>' + (state.antragstyp === 'erstausstellung' ? 'Erstausstellung' : 'Vereinswechsel') + '</strong>' + grundHtml + '<br>' +
-        'Seite 3 (Einverständniserklärung) ist mit ausgefüllt. Anschließend zur Unterschrift an den Spieler weiterleiten.' + docsHtml;
+        abschluss + docsHtml;
       result.classList.add('visible');
       setTimeout(() => result.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
     } catch (err) {
