@@ -83,6 +83,14 @@
   input.text-input.invalid { box-shadow: inset 0 0 0 2px var(--no); }
   .field-error { color: var(--no); font-size: 12.5px; font-weight: 600; margin-top: 7px; line-height: 1.35; display: none; }
   .field-error.show { display: block; }
+  .detect-pill { display: none; margin: -2px 0 16px; padding: 11px 14px; background: rgba(0,98,173,0.08); border: 1px solid rgba(0,98,173,0.22); border-radius: 12px; font-size: 13px; color: var(--ink-soft); font-weight: 600; line-height: 1.4; }
+  .detect-pill.show { display: block; }
+  .detect-pill strong { color: var(--bg-deep); }
+  .steps { margin-top: 18px; padding-top: 18px; border-top: 1.5px solid var(--line); }
+  .steps-head { font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 10px; }
+  .steps ol { margin: 0; padding-left: 20px; }
+  .steps li { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 7px; line-height: 1.45; }
+  .steps li:last-child { margin-bottom: 0; }
   .date-btn { cursor: pointer; display: flex; align-items: center; justify-content: space-between; text-align: left; }
   .date-btn:active { transform: scale(0.99); }
   .date-btn.has-value { box-shadow: inset 0 0 0 1.5px var(--ink); }
@@ -199,6 +207,7 @@
     </div>
     <div class="field-error" id="err-geschlecht">Bitte das Geschlecht wählen.</div>
   </div>
+  <div class="detect-pill" id="detectPill"></div>
   <div class="field">
     <label class="field-label" for="geburtsort">Geburtsort</label>
     <input class="text-input" id="geburtsort" type="text" autocomplete="off" autocapitalize="words" placeholder="z. B. Nürnberg">
@@ -268,7 +277,16 @@
   </div>
   <div class="result-body">
     <div class="result-meta" id="resMeta"></div>
-    <button type="button" class="dl-btn" id="shareBtn" style="display:none">PDF teilen / senden</button>
+    <div class="steps">
+      <div class="steps-head">Nächste Schritte</div>
+      <ol>
+        <li>PDF an den Spieler senden und unterschreiben lassen (bei Minderjährigen: Erziehungsberechtigte).</li>
+        <li>Erforderliche Unterlagen beifügen (siehe Hinweise oben).</li>
+        <li>Antrag online über SpielPlus beim BFV einreichen.</li>
+        <li>Unterlagen 2 Jahre im Verein aufbewahren.</li>
+      </ol>
+    </div>
+    <button type="button" class="dl-btn" id="shareBtn" style="display:none;margin-top:18px">PDF teilen / senden</button>
     <a class="dl-btn secondary" id="dlBtn" href="#">PDF herunterladen</a>
     <button type="button" class="reset-btn" id="resetBtn">+ Neuen Antrag erstellen</button>
   </div>
@@ -276,7 +294,7 @@
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2.7.1 · 04.06.2026</div>
+  VERSION 2.8 · 04.06.2026</div>
 
 <!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -333,7 +351,7 @@
       if (row) row.classList.remove('invalid');
       const err = document.getElementById('err-' + b.dataset.toggle);
       if (err) err.classList.remove('show');
-      if (b.dataset.toggle === 'geschlecht') updateWechselgrund();
+      if (b.dataset.toggle === 'geschlecht') { updateWechselgrund(); updateDetect(); }
       if (b.dataset.toggle === 'antragstyp') {
         const isVW = b.dataset.value === 'vereinswechsel';
         document.getElementById('vwFields').classList.toggle('visible', isVW);
@@ -379,6 +397,7 @@
     const de = document.getElementById('err-geburtsdatum'); if (de) de.classList.remove('show');
     updateDocNotice();
     updateWechselgrund();
+    updateDetect();
     closePicker();
   }
   attach(wDay);
@@ -397,6 +416,42 @@
     const u = s.end - geburtsdatum.getFullYear();
     if (geschlecht === 'weiblich') return u <= 17 ? 'jugend' : 'senioren';
     return u <= 19 ? 'jugend' : 'senioren';
+  }
+
+  // === Erkennung sichtbar machen (#3) ===
+  function detectKlasse(gd, g) {
+    const u = getSaison(new Date()).end - gd.getFullYear();
+    if (g === 'weiblich') {
+      if (u >= 18) return 'Frauen';
+      if (u === 17) return 'B-Juniorinnen (älter)';
+      if (u === 16) return 'B-Juniorinnen';
+      if (u >= 14) return 'C-Juniorinnen';
+      if (u >= 12) return 'D-Juniorinnen';
+      if (u >= 10) return 'E-Juniorinnen';
+      if (u >= 8)  return 'F-Juniorinnen';
+      return 'G-Juniorinnen';
+    }
+    if (u >= 20) return 'Herren';
+    if (u === 19) return 'A-Jugend (älterer Jahrgang)';
+    if (u === 18) return 'A-Jugend';
+    if (u >= 16) return 'B-Jugend';
+    if (u >= 14) return 'C-Jugend';
+    if (u >= 12) return 'D-Jugend';
+    if (u >= 10) return 'E-Jugend';
+    if (u >= 8)  return 'F-Jugend';
+    return 'G-Jugend';
+  }
+  function updateDetect() {
+    const pill = document.getElementById('detectPill');
+    if (state.geburtsdatum && state.geschlecht) {
+      const form = getFormular(state.geburtsdatum, state.geschlecht);
+      const kl = detectKlasse(state.geburtsdatum, state.geschlecht);
+      const formLabel = form === 'jugend' ? 'Jugend-Antrag (Junioren / Juniorinnen)' : 'Senioren-Antrag (Herren / Frauen)';
+      pill.innerHTML = 'Erkannt: <strong>' + kl + '</strong> → ' + formLabel;
+      pill.classList.add('show');
+    } else {
+      pill.classList.remove('show');
+    }
   }
 
   // === Wechselgrund (Seite 2, Group3) — Wegfall der Wartefrist ===
@@ -538,7 +593,13 @@
     }
 
     if (problems.length) {
-      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Autofokus + Tastatur bei Textfeldern (#14)
+        if (firstInvalid.tagName === 'INPUT') {
+          setTimeout(() => { try { firstInvalid.focus({ preventScroll: true }); } catch(e) { firstInvalid.focus(); } }, 350);
+        }
+      }
       return;
     }
 
@@ -625,7 +686,7 @@
       }
 
       document.getElementById('resultTop').classList.remove('error');
-      document.getElementById('resKicker').textContent = (formular === 'jugend' ? 'Jugend' : 'Senioren') + '-Passantrag erstellt';
+      document.getElementById('resKicker').textContent = '✓ Antrag erfolgreich erstellt';
       document.getElementById('resHeadline').textContent = val('vorname') + ' ' + val('familienname');
       const docs = buildDocs();
       const docsHtml = docs.length ? '<br><br><strong>Unbedingt beifügen:</strong><br>• ' + docs.join('<br>• ') : '';
@@ -683,6 +744,7 @@
     document.getElementById('vwFields').classList.remove('visible');
     document.getElementById('docNotice').classList.remove('show');
     updateWechselgrund();
+    updateDetect();
     result.classList.remove('visible');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });

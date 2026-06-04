@@ -381,6 +381,23 @@
     padding: 22px clamp(18px, 5.5vw, 24px) 24px;
   }
 
+  /* Status-Ampel (Hero) */
+  .status-banner { padding: 22px clamp(18px, 5.5vw, 24px); color: #fff; }
+  .status-banner.s-gruen { background: var(--ok); }
+  .status-banner.s-gelb  { background: #C2870F; }
+  .status-banner.s-rot   { background: var(--no); }
+  .status-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; }
+  .status-headline { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: clamp(22px, 6.5vw, 28px); line-height: 1.06; text-transform: uppercase; margin-top: 6px; }
+  .status-sub { font-size: 14px; opacity: 0.92; margin-top: 8px; line-height: 1.45; }
+
+  /* Altersklasse kompakt */
+  .ak-line { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .ak-chip { width: 42px; height: 42px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 22px; color: #fff; }
+  .ak-chip.compact { font-size: 14px; }
+  .ak-text { display: flex; flex-direction: column; line-height: 1.2; }
+  .ak-text .ak-name { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: -0.01em; color: var(--ink); }
+  .ak-text .ak-jahr { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-muted); letter-spacing: 0.04em; margin-top: 3px; }
+
   .pantone-title {
     font-family: 'Archivo', sans-serif;
     font-weight: 900;
@@ -678,12 +695,19 @@
 </div>
 
 <div class="pantone" id="result">
-  <div class="swatch" id="swatch">
-    <div class="swatch-letter" id="swatchLetter">D</div>
+  <div class="status-banner" id="statusBanner">
+    <div class="status-label">Ergebnis</div>
+    <div class="status-headline" id="statusHeadline">—</div>
+    <div class="status-sub" id="statusSub"></div>
   </div>
   <div class="pantone-body">
-    <h2 class="pantone-title" id="resTitle">D-Jugend</h2>
-    <div class="pantone-sub" id="resSub">JAHRGANG 2014</div>
+    <div class="ak-line">
+      <span class="ak-chip" id="akChip">D</span>
+      <span class="ak-text">
+        <span class="ak-name" id="resTitle">D-Jugend</span>
+        <span class="ak-jahr" id="resSub">Jahrgang 2014</span>
+      </span>
+    </div>
 
     <div class="rights">
       <div class="right-row">
@@ -710,7 +734,7 @@
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2.7.1 · 04.06.2026</div>
+  VERSION 2.8 · 04.06.2026</div>
 
 <!-- Hamburger-Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -1102,14 +1126,13 @@
 
     // Render
     const color = COLORS[ak.kuerzel] || COLORS.D;
-    document.getElementById('swatch').style.setProperty('--swatch-color', color);
-
-    const letterEl = document.getElementById('swatchLetter');
-    letterEl.textContent = ak.letter;
-    letterEl.classList.toggle('compact', ak.letter.length > 1);
+    const chip = document.getElementById('akChip');
+    chip.style.background = color;
+    chip.textContent = ak.letter;
+    chip.classList.toggle('compact', ak.letter.length > 1);
 
     document.getElementById('resTitle').textContent = ak.name;
-    document.getElementById('resSub').textContent = 'JAHRGANG ' + jahr;
+    document.getElementById('resSub').textContent = 'Jahrgang ' + jahr;
     document.getElementById('resPrivat').textContent = fmtDe(r.pri);
     document.getElementById('resPrivat').className = 'right-val';
 
@@ -1118,6 +1141,30 @@
     if (r.ver === 'KEINE') { ve.textContent = 'nicht erforderlich'; ve.classList.add('muted'); }
     else if (r.ver === 'INAKTIV') { ve.textContent = 'nur nach 6 Mon. Spielpause'; ve.classList.add('warn'); }
     else ve.textContent = fmtDe(r.ver);
+
+    // === Status-Ampel ===
+    const today = new Date(); today.setHours(0,0,0,0);
+    const banner = document.getElementById('statusBanner');
+    const head = document.getElementById('statusHeadline');
+    const sub = document.getElementById('statusSub');
+    banner.classList.remove('s-gruen','s-gelb','s-rot');
+    if (r.ver === 'KEINE') {
+      banner.classList.add('s-gruen');
+      head.textContent = 'Spielberechtigt';
+      sub.textContent = 'Privatspielrecht reicht für Meisterschaftsspiele — keine Wartezeit.';
+    } else if (r.ver === 'INAKTIV') {
+      banner.classList.add('s-rot');
+      head.textContent = 'Noch nicht für Pflichtspiele';
+      sub.textContent = 'Verbandsspielrecht nur über eine 6-monatige Spielpause oder Warten auf die nächste Wechselperiode.';
+    } else if (r.ver <= today) {
+      banner.classList.add('s-gruen');
+      head.textContent = 'Spielberechtigt';
+      sub.textContent = 'Verbandsspielrecht liegt vor (ab ' + fmtDe(r.ver) + ').';
+    } else {
+      banner.classList.add('s-gelb');
+      head.textContent = 'Spielberechtigt ab ' + fmtDe(r.ver);
+      sub.textContent = 'Verbandsspielrecht (Pflichtspiele) ab diesem Datum. Privatspielrecht ggf. früher.';
+    }
 
     const nl = document.getElementById('notesList');
     nl.innerHTML = r.hin.map(h => '<li>' + h + '</li>').join('');
