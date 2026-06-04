@@ -145,6 +145,8 @@
   .dl-btn:active { background: var(--bg-deep); }
   .dl-btn.secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); margin-top: 10px; }
   .dl-btn.secondary:active { background: rgba(10,10,10,0.06); }
+  .copy-btn { width: 100%; background: none; border: 1.5px solid #25D366; color: #1a8c47; border-radius: 14px; padding: 15px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; margin-top: 14px; }
+  .copy-btn:active, .copy-btn.copied { background: #25D366; color: #fff; }
   .reset-btn { width: 100%; text-align: center; background: none; border: none; color: var(--ink-muted); font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; padding: 16px 0 4px; cursor: pointer; }
   .reset-btn:active { color: var(--ink); }
 
@@ -279,22 +281,18 @@
     <div class="result-meta" id="resMeta"></div>
     <div class="steps">
       <div class="steps-head">Nächste Schritte</div>
-      <ol>
-        <li>PDF an den Spieler senden und unterschreiben lassen (bei Minderjährigen: Erziehungsberechtigte).</li>
-        <li>Erforderliche Unterlagen beifügen (siehe Hinweise oben).</li>
-        <li>Antrag online über SpielPlus beim BFV einreichen.</li>
-        <li>Unterlagen 2 Jahre im Verein aufbewahren.</li>
-      </ol>
+      <ol id="stepsList"></ol>
     </div>
     <button type="button" class="dl-btn" id="shareBtn" style="display:none;margin-top:18px">PDF teilen / senden</button>
     <a class="dl-btn secondary" id="dlBtn" href="#">PDF herunterladen</a>
+    <button type="button" class="copy-btn" id="copyBtn">📋 WhatsApp-Nachricht kopieren</button>
     <button type="button" class="reset-btn" id="resetBtn">+ Neuen Antrag erstellen</button>
   </div>
 </div>
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2.8 · 04.06.2026</div>
+  VERSION 2.9.5 · 04.06.2026</div>
 
 <!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -533,13 +531,28 @@
 
   // === Beizufügende Unterlagen (dynamisch) ===
   function ageYears(birth){ const t=new Date(); let a=t.getFullYear()-birth.getFullYear(); const m=t.getMonth()-birth.getMonth(); if(m<0||(m===0&&t.getDate()<birth.getDate())) a--; return a; }
+
+  // Zentraler Kontext: Alter, Volljährigkeit, Geschlecht, Meldebedarf
+  function playerCtx() {
+    const age    = state.geburtsdatum ? ageYears(state.geburtsdatum) : null;
+    const adult  = age !== null && age >= 18;
+    const female = state.geschlecht === 'weiblich';
+    const sp     = female ? 'Spielerin' : 'Spieler';
+    const desSpIn = female ? 'der Spielerin' : 'des Spielers';
+    const nat    = val('nationalitaet').toLowerCase();
+    // Meldebescheinigung: nicht-deutsch, mind. 10 Jahre, NOCH minderjährig
+    const needsMelde = !adult && nat && nat !== 'deutsch' && age !== null && age >= 10;
+    return { age, adult, female, sp, desSpIn, nat, needsMelde };
+  }
+
   function buildDocs(){
-    const docs=[];
-    if (state.antragstyp !== 'erstausstellung') return docs; // Hinweis nur bei Erstausstellung
-    docs.push('Kopie des <strong>Reisepasses / Personalausweises</strong> des Spielers / der Spielerin.');
-    const nat = val('nationalitaet').toLowerCase();
-    if (nat && nat !== 'deutsch' && state.geburtsdatum && ageYears(state.geburtsdatum) >= 10)
-      docs.push('<strong>Meldebescheinigung</strong> des Spielers / der Spielerin bzw. der Eltern (nicht-deutsche Staatsangehörigkeit ab 10 Jahren).');
+    const docs = [];
+    if (state.antragstyp !== 'erstausstellung') return docs;
+    const c = playerCtx();
+    docs.push('Kopie des <strong>Reisepasses / Personalausweises</strong> ' + c.desSpIn + '.');
+    if (c.needsMelde)
+      docs.push('<strong>Meldebescheinigung</strong> ' + c.desSpIn + ' UND der Eltern (nicht-deutsche Staatsangehörigkeit ab 10 Jahren).');
+    docs.push('<strong>Mitgliedsantrag</strong> vollständig ausgefüllt; Seite 2 muss <strong>3× unterschrieben</strong> sein!');
     return docs;
   }
   function updateDocNotice(){
@@ -602,6 +615,21 @@
       }
       return;
     }
+
+    // Steps sofort rendern (gilt für Erfolg UND Fehler-Pfad)
+    const ctx = playerCtx();
+    const anDen  = ctx.female ? 'an die Spielerin' : 'an den Spieler';
+    const mitErz = ctx.female ? 'an die Spielerin / Erziehungsberechtigte' : 'an den Spieler / Erziehungsberechtigten';
+    const s1 = ctx.adult
+      ? 'Passantrag ' + anDen + ' senden und unterschreiben lassen.'
+      : 'Passantrag ' + mitErz + ' senden und unterschreiben lassen (ab E-Jugend muss Erziehungsberechtigte/r <strong>UND</strong> ' + ctx.sp + ' unterschreiben!).';
+    document.getElementById('stepsList').innerHTML = [
+      s1,
+      'Im Passantrag beigefügten Mitgliedsantrag vollständig ausfüllen und ebenfalls unterschreiben lassen.',
+      '<strong>ALLE</strong> erforderlichen Unterlagen (siehe auch Hinweise oben) als Bild an Kristian per WhatsApp schicken.',
+      'Kristian reicht Passantrag online über SpielPlus beim BFV ein.',
+      'Trainer schickt Mitgliedsantrag an die Geschäftsstelle — <a href="mailto:info@post-sv.de" style="color:var(--ink)">info@post-sv.de</a>',
+    ].map(s => '<li>' + s + '</li>').join('');
 
     genBtn.disabled = true; genBtn.textContent = 'Erstelle PDF…';
     try {
@@ -688,6 +716,7 @@
       document.getElementById('resultTop').classList.remove('error');
       document.getElementById('resKicker').textContent = '✓ Antrag erfolgreich erstellt';
       document.getElementById('resHeadline').textContent = val('vorname') + ' ' + val('familienname');
+
       const docs = buildDocs();
       const docsHtml = docs.length ? '<br><br><strong>Unbedingt beifügen:</strong><br>• ' + docs.join('<br>• ') : '';
       let grundHtml = '';
@@ -714,6 +743,54 @@
     }
   }
   genBtn.addEventListener('click', generate);
+
+  // === WhatsApp-Nachricht kopieren ===
+  function buildWhatsAppText() {
+    const name = val('vorname') + ' ' + val('familienname');
+    const c = playerCtx();
+    // Schritt 1: wer muss unterschreiben?
+    const unterzeichner = c.adult
+      ? c.sp                                  // nur Spieler/Spielerin
+      : c.sp + ' + Erziehungsberechtigte/r';  // beides, wenn minderjährig
+    let t = 'Hallo,\n\n'
+      + 'anbei der Passantrag für ' + name + ' sowie der Mitgliedsantrag für den Post SV Nürnberg e.V.\n\n'
+      + 'Bitte folgendes erledigen:\n\n'
+      + '1. Passantrag unterschreiben — ' + unterzeichner + '\n\n'
+      + '2. Mitgliedsantrag vollständig ausfüllen;\n'
+      + 'Seite 2 muss unbedingt 3× unterschrieben und Bankverbindung muss immer ausgefüllt sein!\n\n'
+      + '3. Alle Unterlagen als Foto per WhatsApp an mich zurückschicken:\n'
+      + '• Passantrag (unterschrieben)\n'
+      + '• Mitgliedsantrag (ausgefüllt & unterschrieben)';
+    // Reisepass + Meldebescheinigung: nur bei Erstausstellung (bei Vereinswechsel bereits im BFV-System)
+    if (state.antragstyp === 'erstausstellung') {
+      t += '\n• Kopie Reisepass oder Personalausweis';
+      if (c.needsMelde)
+        t += '\n• Meldebescheinigung ' + c.desSpIn + ' UND der Eltern (nicht-deutsche Staatsangehörigkeit)';
+    }
+    t += '\n\nBei Fragen jederzeit melden! 🙏';
+    return t;
+  }
+
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(buildWhatsAppText());
+      copyBtn.textContent = '✓ Text kopiert!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => { copyBtn.textContent = '📋 WhatsApp-Nachricht kopieren'; copyBtn.classList.remove('copied'); }, 2500);
+    } catch(e) {
+      // Fallback für ältere Browser
+      const ta = document.createElement('textarea');
+      ta.value = buildWhatsAppText();
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      copyBtn.textContent = '✓ Text kopiert!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => { copyBtn.textContent = '📋 WhatsApp-Nachricht kopieren'; copyBtn.classList.remove('copied'); }, 2500);
+    }
+  });
 
   // Passnummer: Auto-Sprung von Feld 1 zu Feld 2 nach 4 Ziffern
   const pn1El = document.getElementById('passnummer1'), pn2El = document.getElementById('passnummer2');
