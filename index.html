@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pass-App">
+<meta name="apple-mobile-web-app-title" content="Post SV App">
 <meta name="theme-color" content="#0062AD">
-<title>Pass-App</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIyIiBmaWxsPSIjMDA2MkFEIi8+PHRleHQgeD0iNTAiIHk9IjU0IiBmb250LWZhbWlseT0iQXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCI+UDwvdGV4dD48L3N2Zz4=">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Post SV Nürnberg · Fussball App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -123,6 +125,10 @@
   .result-meta strong { color: var(--ink); }
   .dl-btn { width: 100%; display: block; text-align: center; background: var(--ink); color: #fff; border: none; border-radius: 14px; padding: 16px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 16px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; text-decoration: none; }
   .dl-btn:active { background: var(--bg-deep); }
+  .dl-btn.secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); margin-top: 10px; }
+  .dl-btn.secondary:active { background: rgba(10,10,10,0.06); }
+  .reset-btn { width: 100%; text-align: center; background: none; border: none; color: var(--ink-muted); font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; padding: 16px 0 4px; cursor: pointer; }
+  .reset-btn:active { color: var(--ink); }
 
   .page-foot { text-align: center; margin-top: 22px; color: rgba(255,255,255,0.6); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; line-height: 1.7; }
 
@@ -150,7 +156,7 @@
 
 <div class="page-head">
   <div class="head-top">
-    <div class="eyebrow">Post SV Nürnberg · Pass-App</div>
+    <div class="eyebrow">Post SV Nürnberg · Fussball App</div>
     <button type="button" class="menu-btn" id="menuBtn" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   </div>
   <h1 class="page-title">Passantrag</h1>
@@ -247,14 +253,15 @@
   </div>
   <div class="result-body">
     <div class="result-meta" id="resMeta"></div>
-    <a class="dl-btn" id="dlBtn" href="#">PDF herunterladen</a>
+    <button type="button" class="dl-btn" id="shareBtn" style="display:none">PDF teilen / senden</button>
+    <a class="dl-btn secondary" id="dlBtn" href="#">PDF herunterladen</a>
+    <button type="button" class="reset-btn" id="resetBtn">+ Neuen Antrag erstellen</button>
   </div>
 </div>
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2026-06-02-v25
-</div>
+  VERSION 2.6 · 04.06.2026</div>
 
 <!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -485,7 +492,7 @@
       const file = formular === 'jugend' ? 'passantrag_jugend.pdf' : 'passantrag_senioren.pdf';
       const bytes = await fetch(file).then(r => { if(!r.ok) throw new Error('PDF-Vorlage nicht gefunden: '+file); return r.arrayBuffer(); });
 
-      const { PDFDocument, StandardFonts } = PDFLib;
+      const { PDFDocument, StandardFonts, PDFName } = PDFLib;
       const doc = await PDFDocument.load(bytes);
       const form = doc.getForm();
       const helv = await doc.embedFont(StandardFonts.Helvetica);
@@ -521,12 +528,14 @@
       } catch(e){}
 
       // Antragstyp (Group2): Jugend 1=Erst,2=Wechsel | Senioren 2=Erst,5=Wechsel
+      // pdf-lib liest numerische Optionswerte falsch aus (select() schlägt fehl)
+      // → Wert direkt am AcroField setzen.
       try {
         const g2 = form.getRadioGroup('Group2');
         let v;
         if (formular === 'jugend') v = state.antragstyp === 'erstausstellung' ? '1' : '2';
         else v = state.antragstyp === 'erstausstellung' ? '2' : '5';
-        g2.select(v);
+        g2.acroField.setValue(PDFName.of(v));
       } catch(e){}
 
       form.updateFieldAppearances(helv);
@@ -537,6 +546,19 @@
       const fname = `Passantrag_${val('familienname')}_${val('vorname')}.pdf`.replace(/\s+/g,'_');
       const dl = document.getElementById('dlBtn');
       dl.href = url; dl.setAttribute('download', fname);
+
+      // Teilen-Button: native Freigabe (iOS-Teilen-Sheet) wenn unterstützt
+      const shareBtn = document.getElementById('shareBtn');
+      let shareFile = null;
+      try { shareFile = new File([blob], fname, { type: 'application/pdf' }); } catch(e){}
+      if (shareFile && navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+        shareBtn.style.display = 'block';
+        shareBtn.onclick = async () => {
+          try { await navigator.share({ files: [shareFile], title: fname, text: 'Passantrag ' + val('vorname') + ' ' + val('familienname') }); } catch(e){}
+        };
+      } else {
+        shareBtn.style.display = 'none';
+      }
 
       document.getElementById('resultTop').classList.remove('error');
       document.getElementById('resKicker').textContent = (formular === 'jugend' ? 'Jugend' : 'Senioren') + '-Passantrag erstellt';
@@ -575,6 +597,25 @@
   // PLZ nur Ziffern
   const plzEl = document.getElementById('plz');
   if (plzEl) plzEl.addEventListener('input', () => { plzEl.value = plzEl.value.replace(/\D/g,'').slice(0,5); });
+
+  // === Neuen Antrag (Formular zurücksetzen) ===
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    ['familienname','vorname','geburtsort','nationalitaet','strasse','plz','wohnort','letzterVerein','passnummer1','passnummer2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = ''; el.classList.remove('invalid'); }
+    });
+    document.querySelectorAll('.toggle.on').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('.field-error.show').forEach(e => e.classList.remove('show'));
+    document.querySelectorAll('.toggle-row.invalid').forEach(e => e.classList.remove('invalid'));
+    state.geburtsdatum = null; state.geschlecht = null; state.antragstyp = null;
+    const db = document.querySelector('[data-target="geburtsdatum"]');
+    db.classList.remove('has-value','invalid');
+    const dv = db.querySelector('.val'); dv.textContent = 'Datum wählen'; dv.classList.add('placeholder');
+    document.getElementById('vwFields').classList.remove('visible');
+    document.getElementById('docNotice').classList.remove('show');
+    result.classList.remove('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 })();
 </script>
 </body>
