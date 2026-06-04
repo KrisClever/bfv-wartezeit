@@ -101,6 +101,16 @@
   .passnr-row { display: flex; align-items: center; gap: 10px; }
   .passnr-row .text-input { text-align: center; letter-spacing: 0.14em; }
   .passnr-dash { font-family: 'Archivo', sans-serif; font-weight: 700; color: var(--ink-muted); font-size: 22px; flex-shrink: 0; }
+  select.select-input {
+    width: 100%; background: var(--white); border: none; border-radius: 14px;
+    padding: 15px 40px 15px 16px; font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 15px;
+    color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); -webkit-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230A0A0A' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+  select.select-input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+  select.select-input:disabled { color: var(--ink-muted); }
+  .field-hint { font-size: 12px; color: var(--ink-muted); margin-top: 7px; line-height: 1.4; }
 
   .submit { width: 100%; background: var(--ink); color: var(--white); border: none; border-radius: 16px; padding: 19px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.15s, transform 0.08s; margin-top: 6px; }
   .notice { background: #FFF4D6; border: 1.5px solid var(--accent); border-radius: 14px; padding: 15px 17px; margin: 4px 0 18px; display: none; }
@@ -236,6 +246,11 @@
         <input class="text-input" id="passnummer2" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="xxxx">
       </div>
     </div>
+    <div class="field">
+      <label class="field-label" for="wechselgrund">Wechselgrund (optional)</label>
+      <select class="select-input" id="wechselgrund"><option value="">Erst Geburtsdatum & Geschlecht wählen</option></select>
+      <div class="field-hint">Nur wählen, wenn die Wartefrist entfällt (§ 31 JO / § 44 SpO). Sonst „kein besonderer Grund".</div>
+    </div>
   </div>
 
   <div class="notice" id="docNotice">
@@ -261,7 +276,7 @@
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2.6 · 04.06.2026</div>
+  VERSION 2.7.1 · 04.06.2026</div>
 
 <!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -318,9 +333,11 @@
       if (row) row.classList.remove('invalid');
       const err = document.getElementById('err-' + b.dataset.toggle);
       if (err) err.classList.remove('show');
+      if (b.dataset.toggle === 'geschlecht') updateWechselgrund();
       if (b.dataset.toggle === 'antragstyp') {
         const isVW = b.dataset.value === 'vereinswechsel';
         document.getElementById('vwFields').classList.toggle('visible', isVW);
+        if (isVW) updateWechselgrund();
         if (!isVW) { const lv=document.getElementById('letzterVerein'); lv.classList.remove('invalid'); const le=document.getElementById('err-letzterVerein'); if(le) le.classList.remove('show'); }
         updateDocNotice();
       }
@@ -361,6 +378,7 @@
     btn.classList.remove('invalid');
     const de = document.getElementById('err-geburtsdatum'); if (de) de.classList.remove('show');
     updateDocNotice();
+    updateWechselgrund();
     closePicker();
   }
   attach(wDay);
@@ -379,6 +397,44 @@
     const u = s.end - geburtsdatum.getFullYear();
     if (geschlecht === 'weiblich') return u <= 17 ? 'jugend' : 'senioren';
     return u <= 19 ? 'jugend' : 'senioren';
+  }
+
+  // === Wechselgrund (Seite 2, Group3) — Wegfall der Wartefrist ===
+  const GRUND_JUGEND = [
+    ['', '— kein besonderer Grund —'],
+    ['0', '6 Monate nicht gespielt (§ 31 1a JO)'],
+    ['1', 'Umzug / Wohnortwechsel (§ 31 1b JO)'],
+    ['2', 'Verein aufgelöst / Spielbetrieb eingestellt (§ 31 1c JO)'],
+    ['3', 'Zusammenschluss von Vereinen'],
+    ['4', 'Studium (Hochschulort / Rückkehr)'],
+    ['5', 'Rückkehr zum alten Verein'],
+  ];
+  const GRUND_SENIOREN = [
+    ['', '— kein besonderer Grund —'],
+    ['0', 'Noch keinem FIFA-Verband angehört'],
+    ['1', '6 Monate nicht gespielt (§ 44 Nr. 2)'],
+    ['2', 'Verein aufgelöst / Spielbetrieb eingestellt'],
+    ['3', 'Zusammenschluss von Vereinen'],
+    ['4', 'Zusammenschluss rückgängig gemacht'],
+    ['5', 'Rückkehr zum alten Verein'],
+    ['6', 'Studienbeginn → ortsansässiger Verein'],
+    ['7', 'Studienende → Rückkehr zum alten Verein'],
+    ['8', 'Neugründung eines Verbandsvereins'],
+    ['9', 'Zusammenschluss → Wechsel zu drittem Verein'],
+  ];
+  function updateWechselgrund(){
+    const sel = document.getElementById('wechselgrund');
+    if (!sel) return;
+    const prev = sel.value;
+    if (!state.geburtsdatum || !state.geschlecht) {
+      sel.innerHTML = '<option value="">Erst Geburtsdatum & Geschlecht wählen</option>';
+      sel.disabled = true;
+      return;
+    }
+    sel.disabled = false;
+    const list = getFormular(state.geburtsdatum, state.geschlecht) === 'jugend' ? GRUND_JUGEND : GRUND_SENIOREN;
+    sel.innerHTML = list.map(([v,l]) => '<option value="'+v+'">'+l+'</option>').join('');
+    if (list.some(([v]) => v === prev)) sel.value = prev;
   }
 
   function val(id){ return (document.getElementById(id).value || '').trim(); }
@@ -538,6 +594,14 @@
         g2.acroField.setValue(PDFName.of(v));
       } catch(e){}
 
+      // Wechselgrund (Group3, Seite 2) — nur bei Vereinswechsel und wenn gewählt
+      if (state.antragstyp === 'vereinswechsel') {
+        const grund = document.getElementById('wechselgrund').value;
+        if (grund !== '') {
+          try { form.getRadioGroup('Group3').acroField.setValue(PDFName.of(grund)); } catch(e){}
+        }
+      }
+
       form.updateFieldAppearances(helv);
       const out = await doc.save();
 
@@ -565,9 +629,14 @@
       document.getElementById('resHeadline').textContent = val('vorname') + ' ' + val('familienname');
       const docs = buildDocs();
       const docsHtml = docs.length ? '<br><br><strong>Unbedingt beifügen:</strong><br>• ' + docs.join('<br>• ') : '';
+      let grundHtml = '';
+      if (state.antragstyp === 'vereinswechsel') {
+        const gsel = document.getElementById('wechselgrund');
+        if (gsel.value !== '') grundHtml = '<br>Wechselgrund: <strong>' + gsel.options[gsel.selectedIndex].text + '</strong>';
+      }
       document.getElementById('resMeta').innerHTML =
         'Formular: <strong>' + (formular === 'jugend' ? 'Junioren / Juniorinnen' : 'Herren / Senioren / Frauen') + '</strong><br>' +
-        'Art: <strong>' + (state.antragstyp === 'erstausstellung' ? 'Erstausstellung' : 'Vereinswechsel') + '</strong><br>' +
+        'Art: <strong>' + (state.antragstyp === 'erstausstellung' ? 'Erstausstellung' : 'Vereinswechsel') + '</strong>' + grundHtml + '<br>' +
         'Seite 3 (Einverständniserklärung) ist mit ausgefüllt. Anschließend zur Unterschrift an den Spieler weiterleiten.' + docsHtml;
       result.classList.add('visible');
       setTimeout(() => result.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
@@ -613,6 +682,7 @@
     const dv = db.querySelector('.val'); dv.textContent = 'Datum wählen'; dv.classList.add('placeholder');
     document.getElementById('vwFields').classList.remove('visible');
     document.getElementById('docNotice').classList.remove('show');
+    updateWechselgrund();
     result.classList.remove('visible');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
