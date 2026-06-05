@@ -67,6 +67,22 @@
 
   /* Card */
   .input-card { background: var(--cream); border-radius: 24px; padding: clamp(18px,5.5vw,24px) clamp(16px,5vw,22px) 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08); }
+  /* Nationalität-Dropdown */
+  .nat-dropdown { position: relative; }
+  .nat-trigger { width: 100%; background: var(--white); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px 16px; font-family: 'DM Sans', sans-serif; font-size: clamp(14px,4vw,16px); color: var(--ink); text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; transition: border-color 0.15s; }
+  .nat-trigger.invalid { box-shadow: inset 0 0 0 2px var(--no); border-color: var(--no); }
+  .nat-placeholder { color: var(--ink-muted); }
+  .nat-chev { color: var(--ink-muted); font-size: 11px; flex-shrink: 0; margin-left: 8px; transition: transform 0.15s; }
+  .nat-panel.open ~ * .nat-chev, .nat-chev.open { transform: rotate(180deg); }
+  .nat-panel { display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--white); border: 1.5px solid var(--line); border-radius: 14px; z-index: 200; box-shadow: 0 8px 28px rgba(0,0,0,0.14); overflow: hidden; }
+  .nat-panel.open { display: flex; flex-direction: column; }
+  .nat-search { border: none; border-bottom: 1.5px solid var(--line); padding: 12px 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; background: var(--cream); width: 100%; box-sizing: border-box; flex-shrink: 0; }
+  .nat-options { max-height: 210px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .nat-item { padding: 11px 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); color: var(--ink); }
+  .nat-item:last-child { border-bottom: none; }
+  .nat-item.nat-de { font-weight: 700; }
+  .nat-item:active, .nat-item.nat-active { background: var(--cream); }
+  .nat-none { padding: 14px 16px; color: var(--ink-muted); font-style: italic; font-size: 14px; text-align: center; }
   /* Modus-Toggle — 2D flat */
   .modus-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: rgba(0,0,0,0.08); border-radius: 12px; padding: 3px; margin-bottom: 22px; }
   .modus-btn { background: transparent; border: none; border-radius: 9px; padding: 12px 8px; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); cursor: pointer; transition: background 0.15s, color 0.15s, font-weight 0.15s; }
@@ -241,9 +257,19 @@
     <input class="text-input" id="geburtsort" type="text" autocomplete="off" autocapitalize="words" placeholder="z. B. Nürnberg">
   </div>
   <div class="field">
-    <label class="field-label" for="nationalitaet">Staatsangehörigkeit</label>
-    <input class="text-input" id="nationalitaet" type="text" list="nat-list" autocomplete="off" autocapitalize="none" placeholder="z. B. deutsch">
-    <datalist id="nat-list"></datalist>
+    <label class="field-label">Staatsangehörigkeit</label>
+    <div class="nat-dropdown" id="natDropdown">
+      <button type="button" class="nat-trigger" id="natTrigger">
+        <span id="natDisplay" class="nat-placeholder">z. B. Deutschland</span>
+        <span class="nat-chev" id="natChev">▾</span>
+      </button>
+      <div class="nat-panel" id="natPanel">
+        <input type="text" class="nat-search" id="natSearch" placeholder="Suchen …" autocomplete="off" autocapitalize="none">
+        <div class="nat-options" id="natOptions"></div>
+      </div>
+    </div>
+    <input type="hidden" id="nationalitaet">
+    <div class="field-error" id="err-nationalitaet">Bitte Staatsangehörigkeit wählen.</div>
   </div>
   </div><!-- /ausfuellen-only -->
 
@@ -320,7 +346,7 @@
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2.11.0 · 05.06.2026</div>
+  VERSION 2.12.0 · 05.06.2026</div>
 
 <!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -538,15 +564,118 @@
   function val(id){ return (document.getElementById(id).value || '').trim(); }
 
   // === Validierung ===
-  const NATIONALITIES = ['deutsch','österreichisch','schweizerisch','französisch','italienisch','spanisch','portugiesisch','niederländisch','belgisch','luxemburgisch','dänisch','schwedisch','norwegisch','finnisch','isländisch','britisch','irisch','polnisch','tschechisch','slowakisch','ungarisch','rumänisch','bulgarisch','griechisch','kroatisch','slowenisch','serbisch','bosnisch','montenegrinisch','mazedonisch','albanisch','kosovarisch','türkisch','russisch','ukrainisch','belarussisch','litauisch','lettisch','estnisch','moldauisch','georgisch','armenisch','aserbaidschanisch','kasachisch','amerikanisch','US-amerikanisch','kanadisch','mexikanisch','brasilianisch','argentinisch','chilenisch','kolumbianisch','marokkanisch','algerisch','tunesisch','ägyptisch','nigerianisch','ghanaisch','kamerunisch','senegalesisch','südafrikanisch','äthiopisch','kenianisch','chinesisch','japanisch','koreanisch','vietnamesisch','thailändisch','indisch','pakistanisch','bangladeschisch','indonesisch','philippinisch','iranisch','irakisch','syrisch','libanesisch','israelisch','afghanisch','australisch','neuseeländisch'];
-  (function fillNatList(){ const dl=document.getElementById('nat-list'); NATIONALITIES.forEach(n=>{ const o=document.createElement('option'); o.value=n; dl.appendChild(o); }); })();
+  const NATIONALITIES = [
+    'Deutschland','Afghanistan','Ägypten','Albanien','Algerien',
+    'Amerika, Vereinigte Staaten von','Andorra','Angola','Antigua und Barbuda',
+    'Äquatorial-Guinea','Argentinien','Armenien','Aserbaidschan','Äthiopien',
+    'Australien','Bahamas','Bahrain','Bangladesch','Barbados','Belarus',
+    'Belgien','Belize','Benin','Bhutan','Bolivien','Bosnien-Herzegowina',
+    'Botsuana','Brasilien','Brunei','Bulgarien','Burkina Faso','Burundi',
+    'Chile','China VR','Costa Rica','Dänemark','Dominica','Dominikanische Republik',
+    'Dschibuti','Ecuador','Elfenbeinküste','El Salvador','Eritrea','Estland',
+    'Fidschi','Finnland','Frankreich','Gabun','Gambia','Georgien','Ghana',
+    'Gibraltar','Grenada','Griechenland','Großbritannien, Nordirland und Schottland',
+    'Guatemala','Guayana','Guinea','Guinea-Bissau','Haiti','Honduras','Indien',
+    'Indonesien','Irak','Iran','Irland, Republik','Island','Israel','Italien',
+    'Jamaika','Japan','Jemen','Jordanien','Jugoslawien','Kambodscha','Kamerun',
+    'Kanada','Kap Verde','Kasachstan','Katar','Kenia','Kirgistan','Kiribati',
+    'Kolumbien','Komoren','Kongo, Republik','Kongo DR',
+    'Korea, Demokratische Volksrepublik','Kroatien','Kuba','Kuwait','Laos',
+    'Lesotho','Lettland','Libanon','Liberia','Libyen','Liechtenstein','Litauen',
+    'Luxemburg','Madagaskar','Malawi','Malaysia','Malediven','Mali','Malta',
+    'Marokko','Mauretanien','Mauritius','Mexiko','Moldau','Monaco','Mongolei',
+    'Montenegro','Mosambik','Myanmar','Namibia','Nepal','Neuseeland','Nicaragua',
+    'Niederlande','Niger','Nigeria','Nordmazedonien','Norwegen','Oman',
+    'Österreich','Osttimor','Pakistan','Palästina','Palau','Panama',
+    'Papua-Neuguinea','Paraguay','Peru','Philippinen','Polen','Portugal',
+    'Ruanda','Rumänien','Russland','Salomon-Inseln','Sambia','Samoa',
+    'San Marino','São Tomé und Príncipe','Saudiarabien','Schweden','Schweiz',
+    'Senegal','Serbien','Serbien und Montenegro','Seychellen','Sierra Leone',
+    'Simbabwe','Singapur','Slowakei','Slowenien','Somalia','Spanien',
+    'Sri Lanka','St. Kitts und Nevis','St. Lucia','St. Vincent und die Grenadinen',
+    'Südafrika','Sudan','Südsudan','Surinam','Swasiland','Syrien','Tadschikistan',
+    'Taiwan','Tansania','Thailand','Togo','Tonga','Trinidad und Tobago','Tschad',
+    'Tschechische Republik','Tunesien','Türkei','Turkmenistan','Tuvalu',
+    'Uganda','Ukraine','Ungarn','Uruguay','Usbekistan','Vanuatu','Vatikanstadt',
+    'Venezuela','Vereinigte Arabische Emirate','Vietnam',
+    'Zentralafrikanische Republik','Zypern'
+  ];
+
+  // Nationalität-Dropdown
+  (function initNatDropdown() {
+    const trigger = document.getElementById('natTrigger');
+    const panel   = document.getElementById('natPanel');
+    const search  = document.getElementById('natSearch');
+    const options = document.getElementById('natOptions');
+    const display = document.getElementById('natDisplay');
+    const hidden  = document.getElementById('nationalitaet');
+    const chev    = document.getElementById('natChev');
+
+    function renderOptions(filter) {
+      const lf = (filter || '').toLowerCase();
+      const matches = lf
+        ? NATIONALITIES.filter(n => n.toLowerCase().includes(lf))
+        : NATIONALITIES;
+      if (!matches.length) {
+        options.innerHTML = '<div class="nat-none">Keine Treffer</div>';
+        return;
+      }
+      options.innerHTML = matches.map(n =>
+        '<div class="nat-item' + (n === 'Deutschland' ? ' nat-de' : '') +
+        '" data-val="' + n + '">' + n + '</div>'
+      ).join('');
+      options.querySelectorAll('.nat-item').forEach(el =>
+        el.addEventListener('click', () => selectNat(el.dataset.val))
+      );
+    }
+
+    function selectNat(val) {
+      hidden.value = val;
+      display.textContent = val;
+      display.classList.remove('nat-placeholder');
+      panel.classList.remove('open');
+      chev.style.transform = '';
+      trigger.classList.remove('invalid');
+      document.getElementById('err-nationalitaet').classList.remove('show');
+      updateDocNotice();
+    }
+
+    function openPanel() {
+      panel.classList.add('open');
+      chev.style.transform = 'rotate(180deg)';
+      search.value = '';
+      renderOptions('');
+      setTimeout(() => search.focus(), 60);
+    }
+
+    function closePanel() {
+      panel.classList.remove('open');
+      chev.style.transform = '';
+    }
+
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      panel.classList.contains('open') ? closePanel() : openPanel();
+    });
+    search.addEventListener('input', () => renderOptions(search.value));
+    panel.addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('click', closePanel);
+
+    // Reset-Hook für Formular-Reset
+    window._resetNatDropdown = function() {
+      hidden.value = '';
+      display.textContent = 'z. B. Deutschland';
+      display.classList.add('nat-placeholder');
+      closePanel();
+    };
+  })();
 
   const hasDigit = s => /\d/.test(s);
   const hasLetter = s => /[A-Za-zÄÖÜäöüß]/.test(s);
   const isText = s => s.length >= 2 && hasLetter(s) && !hasDigit(s);              // Name/Ort: Buchstaben, keine Ziffern
   const isAddress = s => hasLetter(s) && hasDigit(s) && s.length >= 4;            // Straße + Hausnummer
   const isPLZ = s => /^\d{5}$/.test(s);                                           // genau 5 Ziffern
-  const isNationality = s => { const v=s.toLowerCase(); if(!v||hasDigit(v))return false; if(NATIONALITIES.map(n=>n.toLowerCase()).includes(v))return true; return /sch$/.test(v); };
+  const isNationality = s => NATIONALITIES.map(n=>n.toLowerCase()).includes(s.toLowerCase().trim());
 
   const FIELD_VALIDATORS = {
     familienname: { test: isText,        msg: 'Bitte einen gültigen Namen eingeben (keine Zahlen).' },
@@ -585,18 +714,22 @@
     const sp     = female ? 'Spielerin' : 'Spieler';
     const desSpIn = female ? 'der Spielerin' : 'des Spielers';
     const nat    = val('nationalitaet').toLowerCase();
-    // Meldebescheinigung: nicht-deutsch, mind. 10 Jahre, NOCH minderjährig
-    const needsMelde = !adult && nat && nat !== 'deutsch' && age !== null && age >= 10;
-    return { age, adult, female, sp, desSpIn, nat, needsMelde };
+    // Meldebescheinigung: nicht-deutsch, 10–17 Jahre (unabhängig vom Antragstyp)
+    const needsMelde = !adult && nat && nat !== 'deutschland' && age !== null && age >= 10;
+    // Unterschriften-Stufe: < 12 J = nur Erzb.; 12–17 J = Spieler/in + Erzb.; ≥ 18 J = nur Spieler/in
+    const belowDJugend = age !== null && age < 12;
+    return { age, adult, female, sp, desSpIn, nat, needsMelde, belowDJugend };
   }
 
   function buildDocs(){
     const docs = [];
-    if (state.antragstyp !== 'erstausstellung') return docs;
     const c = playerCtx();
+    if (!c.age && !state.geschlecht) return docs; // noch nichts ausgefüllt
+    // Reisepass/Ausweis: immer (unabhängig von Antragstyp + Nationalität)
     docs.push('Kopie des <strong>Reisepasses / Personalausweises</strong> ' + c.desSpIn + '.');
+    // Meldebescheinigung: nicht-deutsch, 10–17 Jahre (unabhängig von Antragstyp)
     if (c.needsMelde)
-      docs.push('<strong>Meldebescheinigung</strong> ' + c.desSpIn + ' UND der Eltern (nicht-deutsche Staatsangehörigkeit ab 10 Jahren).');
+      docs.push('<strong>Meldebescheinigung</strong> ' + c.desSpIn + ' UND der Eltern (nicht-deutsche Staatsangehörigkeit, 10–17 Jahre).');
     return docs;
   }
   function updateDocNotice(){
@@ -674,23 +807,30 @@
     if (state.modus === 'weiterleiten') {
       const signW = state.formulartyp_manuell === 'senioren'
         ? 'Passantrag vollständig ausfüllen und unterschreiben — Spieler/Spielerin'
-        : 'Passantrag vollständig ausfüllen und unterschreiben — Spieler/in + Erziehungsberechtigte/r';
+        : 'Passantrag vollständig ausfüllen und unterschreiben — bei E/F/G-Jugend: nur Erziehungsberechtigte/r; ab D-Jugend: Spieler/in + Erziehungsberechtigte/r';
       stepItems = [
         signW,
-        'Mitgliedsantrag vollständig ausfüllen (Bankverbindung!); <strong>Seite 2 unbedingt 3× unterschreiben</strong> lassen.',
+        'Mitgliedsantrag vollständig ausfüllen; <strong>Seite 2 unbedingt 3× unterschreiben</strong> — <strong>Bankverbindung zwingend ausfüllen</strong> (auch bei gelben Scheinen!).',
         '<strong>ALLE</strong> Unterlagen als Bild an Kristian per WhatsApp schicken.',
         'Kristian reicht Passantrag online über SpielPlus beim BFV ein.',
         'Trainer schickt Mitgliedsantrag an die Geschäftsstelle — <a href="mailto:info@post-sv.de" style="color:var(--ink)">info@post-sv.de</a>',
       ];
     } else {
-      const anDen  = ctx.female ? 'an die Spielerin' : 'an den Spieler';
-      const mitErz = ctx.female ? 'an die Spielerin / Erziehungsberechtigte' : 'an den Spieler / Erziehungsberechtigten';
-      const s1 = ctx.adult
-        ? 'Passantrag ' + anDen + ' senden und unterschreiben lassen.'
-        : 'Passantrag ' + mitErz + ' senden und unterschreiben lassen (ab E-Jugend muss Erziehungsberechtigte/r <strong>UND</strong> ' + ctx.sp + ' unterschreiben!).';
+      // 3-Stufen: < D-Jugend / D-Jugend bis 17J / 18+
+      let s1;
+      if (ctx.adult) {
+        const anDen = ctx.female ? 'an die Spielerin' : 'an den Spieler';
+        s1 = 'Passantrag ' + anDen + ' senden und unterschreiben lassen.';
+      } else if (ctx.belowDJugend) {
+        const anErzb = ctx.female ? 'an die Erziehungsberechtigte' : 'an den Erziehungsberechtigten';
+        s1 = 'Passantrag ' + anErzb + ' senden — bis E-Jugend unterschreibt <strong>nur die Erziehungsberechtigte/r</strong>.';
+      } else {
+        const mitErz = ctx.female ? 'an die Spielerin / Erziehungsberechtigte' : 'an den Spieler / Erziehungsberechtigten';
+        s1 = 'Passantrag ' + mitErz + ' senden — ab D-Jugend müssen Erziehungsberechtigte/r <strong>UND</strong> ' + ctx.sp + ' unterschreiben.';
+      }
       stepItems = [
         s1,
-        'Im Passantrag beigefügten Mitgliedsantrag: Straße, PLZ/Ort, Telefon, E-Mail, IBAN ergänzen — und <strong>Seite 2 unbedingt 3× unterschreiben</strong> lassen.',
+        'Im Passantrag beigefügten Mitgliedsantrag: Straße, PLZ/Ort, Telefon, E-Mail, IBAN ergänzen; <strong>Seite 2 unbedingt 3× unterschreiben</strong> — <strong>Bankverbindung zwingend ausfüllen</strong> (auch bei gelben Scheinen!).',
         '<strong>ALLE</strong> erforderlichen Unterlagen (siehe auch Hinweise oben) als Bild an Kristian per WhatsApp schicken.',
         'Kristian reicht Passantrag online über SpielPlus beim BFV ein.',
         'Trainer schickt Mitgliedsantrag an die Geschäftsstelle — <a href="mailto:info@post-sv.de" style="color:var(--ink)">info@post-sv.de</a>',
@@ -870,43 +1010,42 @@
       const nameStr = name.trim() || 'euren Spieler / eure Spielerin';
       const sign = state.formulartyp_manuell === 'senioren'
         ? 'Passantrag unterschreiben — Spieler / Spielerin'
-        : 'Passantrag unterschreiben — Spieler/in + Erziehungsberechtigte/r';
+        : 'E/F/G-Jugend: nur Erziehungsberechtigte/r — ab D-Jugend: Spieler/in + Erziehungsberechtigte/r';
       let t = 'Hallo,\n\n'
         + 'anbei die Antragsformulare für ' + nameStr + ' (Post SV Nürnberg e.V.).\n\n'
         + 'Bitte folgendes erledigen:\n\n'
-        + '1. ' + sign + '\n\n'
+        + '1. Passantrag unterschreiben:\n'
+        + sign + '\n\n'
         + '2. Mitgliedsantrag vollständig ausfüllen;\n'
-        + 'Seite 2 muss unbedingt 3× unterschrieben und Bankverbindung ausgefüllt sein!\n\n'
+        + 'Seite 2 unbedingt 3× unterschreiben — Bankverbindung zwingend ausfüllen (auch bei gelben Scheinen!)\n\n'
         + '3. Alle Unterlagen als Foto per WhatsApp an mich zurückschicken:\n'
         + '• Passantrag (ausgefüllt & unterschrieben)\n'
-        + '• Mitgliedsantrag (ausgefüllt & unterschrieben)';
-      if (state.antragstyp === 'erstausstellung')
-        t += '\n• Kopie Reisepass oder Personalausweis';
+        + '• Mitgliedsantrag (ausgefüllt & unterschrieben)\n'
+        + '• Kopie Reisepass oder Personalausweis';
       t += '\n\nBei Fragen jederzeit melden! 🙏';
       return t;
     }
 
     // ── Modus: Ausfüllen ───────────────────────────────────────────────────
     const c = playerCtx();
-    // Schritt 1: wer muss unterschreiben?
-    const unterzeichner = c.adult
-      ? c.sp                                  // nur Spieler/Spielerin
-      : c.sp + ' + Erziehungsberechtigte/r';  // beides, wenn minderjährig
+    // Schritt 1: 3 Stufen je nach Alter
+    let unterzeichner;
+    if (c.adult)          unterzeichner = c.sp;                             // ≥ 18 J: nur Spieler/in
+    else if (c.belowDJugend) unterzeichner = 'Erziehungsberechtigte/r';    // < 12 J: nur Erzb.
+    else                  unterzeichner = c.sp + ' + Erziehungsberechtigte/r'; // 12–17 J: beide
     let t = 'Hallo,\n\n'
       + 'anbei der Passantrag für ' + name + ' sowie der Mitgliedsantrag für den Post SV Nürnberg e.V.\n\n'
       + 'Bitte folgendes erledigen:\n\n'
       + '1. Passantrag unterschreiben — ' + unterzeichner + '\n\n'
       + '2. Mitgliedsantrag vollständig ausfüllen;\n'
-      + 'Seite 2 muss unbedingt 3× unterschrieben und Bankverbindung muss immer ausgefüllt sein!\n\n'
+      + 'Seite 2 unbedingt 3× unterschreiben — Bankverbindung zwingend ausfüllen (auch bei gelben Scheinen!)\n\n'
       + '3. Alle Unterlagen als Foto per WhatsApp an mich zurückschicken:\n'
       + '• Passantrag (unterschrieben)\n'
-      + '• Mitgliedsantrag (ausgefüllt & unterschrieben)';
-    // Reisepass + Meldebescheinigung: nur bei Erstausstellung (bei Vereinswechsel bereits im BFV-System)
-    if (state.antragstyp === 'erstausstellung') {
-      t += '\n• Kopie Reisepass oder Personalausweis';
-      if (c.needsMelde)
-        t += '\n• Meldebescheinigung ' + c.desSpIn + ' UND der Eltern (nicht-deutsche Staatsangehörigkeit)';
-    }
+      + '• Mitgliedsantrag (ausgefüllt & unterschrieben)\n'
+      + '• Kopie Reisepass oder Personalausweis';
+    // Meldebescheinigung: nicht-deutsch, 10–17 Jahre (unabhängig vom Antragstyp)
+    if (c.needsMelde)
+      t += '\n• Meldebescheinigung ' + c.desSpIn + ' UND der Eltern (nicht-deutsche Staatsangehörigkeit)';
     t += '\n\nBei Fragen jederzeit melden! 🙏';
     return t;
   }
@@ -947,7 +1086,7 @@
 
   // === Neuen Antrag (Formular zurücksetzen) ===
   document.getElementById('resetBtn').addEventListener('click', () => {
-    ['familienname','vorname','geburtsort','nationalitaet','strasse','plz','wohnort','letzterVerein','passnummer1','passnummer2'].forEach(id => {
+    ['familienname','vorname','geburtsort','strasse','plz','wohnort','letzterVerein','passnummer1','passnummer2'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.value = ''; el.classList.remove('invalid'); }
     });
@@ -955,6 +1094,7 @@
     document.querySelectorAll('.field-error.show').forEach(e => e.classList.remove('show'));
     document.querySelectorAll('.toggle-row.invalid').forEach(e => e.classList.remove('invalid'));
     state.geburtsdatum = null; state.geschlecht = null; state.antragstyp = null;
+    if(window._resetNatDropdown) window._resetNatDropdown();
     const db = document.querySelector('[data-target="geburtsdatum"]');
     db.classList.remove('has-value','invalid');
     const dv = db.querySelector('.val'); dv.textContent = 'Datum wählen'; dv.classList.add('placeholder');
