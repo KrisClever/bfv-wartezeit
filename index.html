@@ -67,6 +67,13 @@
 
   /* Card */
   .input-card { background: var(--cream); border-radius: 24px; padding: clamp(18px,5.5vw,24px) clamp(16px,5vw,22px) 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08); }
+  /* Modus-Toggle — 2D flat */
+  .modus-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: rgba(0,0,0,0.08); border-radius: 12px; padding: 3px; margin-bottom: 22px; }
+  .modus-btn { background: transparent; border: none; border-radius: 9px; padding: 12px 8px; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); cursor: pointer; transition: background 0.15s, color 0.15s, font-weight 0.15s; }
+  .modus-btn.on { background: var(--white); color: var(--ink); font-weight: 800; }
+  body.modus-weiterleiten .ausfuellen-only { display: none !important; }
+  body:not(.modus-weiterleiten) .weiterleiten-only { display: none !important; }
+  .opt-hint { font-size: 11px; color: var(--ink-muted); font-style: italic; margin: -8px 0 14px; }
   .section-label { font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); margin: 6px 0 14px; }
   .section-label.mt { margin-top: 26px; padding-top: 22px; border-top: 1.5px solid var(--line); }
   .field { margin-bottom: 16px; }
@@ -184,7 +191,25 @@
 </div>
 
 <div class="input-card">
+  <div class="modus-toggle">
+    <button type="button" class="modus-btn on" data-modus="ausfuellen">Ausfüllen</button>
+    <button type="button" class="modus-btn" data-modus="weiterleiten">Weiterleiten</button>
+  </div>
+
+  <!-- Formulartyp: nur im Modus "weiterleiten" sichtbar -->
+  <div class="weiterleiten-only">
+    <div class="section-label">Formular</div>
+    <div class="field">
+      <div class="toggle-row" id="row-formulartyp">
+        <button type="button" class="toggle" data-toggle="formulartyp_manuell" data-value="jugend">Jugend</button>
+        <button type="button" class="toggle" data-toggle="formulartyp_manuell" data-value="senioren">Senioren</button>
+      </div>
+      <div class="field-error" id="err-formulartyp_manuell">Bitte Junioren oder Herren/Frauen wählen.</div>
+    </div>
+  </div>
+
   <div class="section-label">Angaben zum Spieler</div>
+  <p class="opt-hint weiterleiten-only">Optional — Name wird in der WhatsApp-Nachricht verwendet</p>
 
   <div class="field">
     <label class="field-label" for="familienname">Familienname</label>
@@ -194,6 +219,7 @@
     <label class="field-label" for="vorname">Vorname</label>
     <input class="text-input" id="vorname" type="text" autocomplete="off" autocapitalize="words" placeholder="z. B. Jakob">
   </div>
+  <div class="ausfuellen-only">
   <div class="field">
     <label class="field-label">Geburtsdatum</label>
     <button type="button" class="date-btn" data-target="geburtsdatum">
@@ -219,8 +245,9 @@
     <input class="text-input" id="nationalitaet" type="text" list="nat-list" autocomplete="off" autocapitalize="none" placeholder="z. B. deutsch">
     <datalist id="nat-list"></datalist>
   </div>
+  </div><!-- /ausfuellen-only -->
 
-  <div class="section-label mt">Anschrift</div>
+  <div class="ausfuellen-only"><div class="section-label mt">Anschrift</div>
   <div class="field">
     <label class="field-label" for="strasse">Straße, Haus-Nr.</label>
     <input class="text-input" id="strasse" type="text" autocomplete="off" autocapitalize="words" placeholder="z. B. Kirchenberg 3">
@@ -235,6 +262,7 @@
       <input class="text-input" id="wohnort" type="text" autocomplete="off" autocapitalize="words" placeholder="Nürnberg">
     </div>
   </div>
+  </div><!-- /ausfuellen-only Anschrift -->
 
   <div class="section-label mt">Art des Antrags</div>
   <div class="field">
@@ -244,7 +272,7 @@
     </div>
     <div class="field-error" id="err-antragstyp">Bitte Erstausstellung oder Vereinswechsel wählen.</div>
   </div>
-  <div id="vwFields">
+  <div id="vwFields" class="ausfuellen-only">
     <div class="field">
       <label class="field-label" for="letzterVerein">Letzter Verein</label>
       <input class="text-input" id="letzterVerein" type="text" autocomplete="off" autocapitalize="words" placeholder="Abgebender Verein">
@@ -264,7 +292,7 @@
     </div>
   </div>
 
-  <div class="notice" id="docNotice">
+  <div class="notice ausfuellen-only" id="docNotice">
     <div class="notice-title">⚠ Unbedingt beifügen</div>
     <ul id="docList"></ul>
   </div>
@@ -292,7 +320,7 @@
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2.10.0 · 05.06.2026</div>
+  VERSION 2.11.0 · 05.06.2026</div>
 
 <!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -326,7 +354,7 @@
 (function() {
   const MONTHS = ['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   const IH = 44;
-  const state = { geburtsdatum: null, geschlecht: null, antragstyp: null };
+  const state = { modus: 'ausfuellen', formulartyp_manuell: null, geburtsdatum: null, geschlecht: null, antragstyp: null };
 
   // === Menü ===
   const menuOverlay = document.getElementById('menuOverlay'), menuPanel = document.getElementById('menuPanel');
@@ -339,6 +367,23 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 
   // === Toggles ===
+  // Modus-Toggle
+  document.querySelectorAll('.modus-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.modus-btn').forEach(x => x.classList.remove('on'));
+      btn.classList.add('on');
+      state.modus = btn.dataset.modus;
+      document.body.classList.toggle('modus-weiterleiten', state.modus === 'weiterleiten');
+      genBtn.textContent = state.modus === 'weiterleiten' ? 'PDF erstellen' : 'Passantrag erstellen';
+      // Reset formulartyp_manuell when switching modes
+      if (state.modus === 'ausfuellen') {
+        state.formulartyp_manuell = null;
+        document.querySelectorAll('[data-toggle="formulartyp_manuell"]').forEach(x => x.classList.remove('on'));
+      }
+      result.classList.remove('visible');
+    });
+  });
+
   document.querySelectorAll('.toggle').forEach(b => {
     b.addEventListener('click', () => {
       document.querySelectorAll(`[data-toggle="${b.dataset.toggle}"]`).forEach(x => x.classList.remove('on'));
@@ -566,42 +611,50 @@
   const genBtn = document.getElementById('genBtn');
 
   async function generate() {
-    // Validierung: Pflicht + Format
+    // Validierung: modus-abhängig
     let firstInvalid = null;
     const problems = [];
 
-    for (const id in FIELD_VALIDATORS) {
-      const v = val(id);
-      if (!v || !FIELD_VALIDATORS[id].test(v)) {
-        const el = showFieldError(id);
-        if (!firstInvalid) firstInvalid = el;
-        problems.push(id);
+    if (state.modus === 'ausfuellen') {
+      for (const id in FIELD_VALIDATORS) {
+        const v = val(id);
+        if (!v || !FIELD_VALIDATORS[id].test(v)) {
+          const el = showFieldError(id);
+          if (!firstInvalid) firstInvalid = el;
+          problems.push(id);
+        }
       }
-    }
-    if (!state.geburtsdatum) {
-      const el = document.querySelector('[data-target="geburtsdatum"]'); el.classList.add('invalid');
-      document.getElementById('err-geburtsdatum').classList.add('show');
-      if (!firstInvalid) firstInvalid = el; problems.push('Geburtsdatum');
-    }
-    if (!state.geschlecht) {
-      document.getElementById('row-geschlecht').classList.add('invalid');
-      document.getElementById('err-geschlecht').classList.add('show');
-      if (!firstInvalid) firstInvalid = document.getElementById('row-geschlecht'); problems.push('Geschlecht');
+      if (!state.geburtsdatum) {
+        const el = document.querySelector('[data-target="geburtsdatum"]'); el.classList.add('invalid');
+        document.getElementById('err-geburtsdatum').classList.add('show');
+        if (!firstInvalid) firstInvalid = el; problems.push('Geburtsdatum');
+      }
+      if (!state.geschlecht) {
+        document.getElementById('row-geschlecht').classList.add('invalid');
+        document.getElementById('err-geschlecht').classList.add('show');
+        if (!firstInvalid) firstInvalid = document.getElementById('row-geschlecht'); problems.push('Geschlecht');
+      }
+      if (state.antragstyp === 'vereinswechsel') {
+        if (!val('letzterVerein')) { const el = showFieldError('letzterVerein'); if (!firstInvalid) firstInvalid = el; problems.push('Letzter Verein'); }
+        const p1 = val('passnummer1'), p2 = val('passnummer2');
+        if ((p1 || p2) && !(p1.length === 4 && p2.length === 4)) {
+          document.getElementById('passnummer1').classList.add('invalid');
+          document.getElementById('passnummer2').classList.add('invalid');
+          problems.push('Passnummer (je 4 Ziffern)');
+        }
+      }
+    } else {
+      // Modus weiterleiten: nur Formulartyp + Antragstyp
+      if (!state.formulartyp_manuell) {
+        document.getElementById('row-formulartyp_manuell').classList.add('invalid');
+        document.getElementById('err-formulartyp_manuell').classList.add('show');
+        if (!firstInvalid) firstInvalid = document.getElementById('row-formulartyp_manuell'); problems.push('Formular');
+      }
     }
     if (!state.antragstyp) {
       document.getElementById('row-antragstyp').classList.add('invalid');
       document.getElementById('err-antragstyp').classList.add('show');
       if (!firstInvalid) firstInvalid = document.getElementById('row-antragstyp'); problems.push('Art des Antrags');
-    }
-
-    if (state.antragstyp === 'vereinswechsel') {
-      if (!val('letzterVerein')) { const el = showFieldError('letzterVerein'); if (!firstInvalid) firstInvalid = el; problems.push('Letzter Verein'); }
-      const p1 = val('passnummer1'), p2 = val('passnummer2');
-      if ((p1 || p2) && !(p1.length === 4 && p2.length === 4)) {
-        document.getElementById('passnummer1').classList.add('invalid');
-        document.getElementById('passnummer2').classList.add('invalid');
-        problems.push('Passnummer (je 4 Ziffern)');
-      }
     }
 
     if (problems.length) {
@@ -617,22 +670,39 @@
 
     // Steps sofort rendern (gilt für Erfolg UND Fehler-Pfad)
     const ctx = playerCtx();
-    const anDen  = ctx.female ? 'an die Spielerin' : 'an den Spieler';
-    const mitErz = ctx.female ? 'an die Spielerin / Erziehungsberechtigte' : 'an den Spieler / Erziehungsberechtigten';
-    const s1 = ctx.adult
-      ? 'Passantrag ' + anDen + ' senden und unterschreiben lassen.'
-      : 'Passantrag ' + mitErz + ' senden und unterschreiben lassen (ab E-Jugend muss Erziehungsberechtigte/r <strong>UND</strong> ' + ctx.sp + ' unterschreiben!).';
-    document.getElementById('stepsList').innerHTML = [
-      s1,
-      'Im Passantrag beigefügten Mitgliedsantrag: Straße, PLZ/Ort, Telefon, E-Mail, IBAN ergänzen — und <strong>Seite 2 unbedingt 3× unterschreiben</strong> lassen.',
-      '<strong>ALLE</strong> erforderlichen Unterlagen (siehe auch Hinweise oben) als Bild an Kristian per WhatsApp schicken.',
-      'Kristian reicht Passantrag online über SpielPlus beim BFV ein.',
-      'Trainer schickt Mitgliedsantrag an die Geschäftsstelle — <a href="mailto:info@post-sv.de" style="color:var(--ink)">info@post-sv.de</a>',
-    ].map(s => '<li>' + s + '</li>').join('');
+    let stepItems;
+    if (state.modus === 'weiterleiten') {
+      const signW = state.formulartyp_manuell === 'senioren'
+        ? 'Passantrag vollständig ausfüllen und unterschreiben — Spieler/Spielerin'
+        : 'Passantrag vollständig ausfüllen und unterschreiben — Spieler/in + Erziehungsberechtigte/r';
+      stepItems = [
+        signW,
+        'Mitgliedsantrag vollständig ausfüllen (Bankverbindung!); <strong>Seite 2 unbedingt 3× unterschreiben</strong> lassen.',
+        '<strong>ALLE</strong> Unterlagen als Bild an Kristian per WhatsApp schicken.',
+        'Kristian reicht Passantrag online über SpielPlus beim BFV ein.',
+        'Trainer schickt Mitgliedsantrag an die Geschäftsstelle — <a href="mailto:info@post-sv.de" style="color:var(--ink)">info@post-sv.de</a>',
+      ];
+    } else {
+      const anDen  = ctx.female ? 'an die Spielerin' : 'an den Spieler';
+      const mitErz = ctx.female ? 'an die Spielerin / Erziehungsberechtigte' : 'an den Spieler / Erziehungsberechtigten';
+      const s1 = ctx.adult
+        ? 'Passantrag ' + anDen + ' senden und unterschreiben lassen.'
+        : 'Passantrag ' + mitErz + ' senden und unterschreiben lassen (ab E-Jugend muss Erziehungsberechtigte/r <strong>UND</strong> ' + ctx.sp + ' unterschreiben!).';
+      stepItems = [
+        s1,
+        'Im Passantrag beigefügten Mitgliedsantrag: Straße, PLZ/Ort, Telefon, E-Mail, IBAN ergänzen — und <strong>Seite 2 unbedingt 3× unterschreiben</strong> lassen.',
+        '<strong>ALLE</strong> erforderlichen Unterlagen (siehe auch Hinweise oben) als Bild an Kristian per WhatsApp schicken.',
+        'Kristian reicht Passantrag online über SpielPlus beim BFV ein.',
+        'Trainer schickt Mitgliedsantrag an die Geschäftsstelle — <a href="mailto:info@post-sv.de" style="color:var(--ink)">info@post-sv.de</a>',
+      ];
+    }
+    document.getElementById('stepsList').innerHTML = stepItems.map(s => '<li>' + s + '</li>').join('');
 
     genBtn.disabled = true; genBtn.textContent = 'Erstelle PDF…';
     try {
-      const formular = getFormular(state.geburtsdatum, state.geschlecht);
+      const formular = state.modus === 'weiterleiten'
+        ? state.formulartyp_manuell
+        : getFormular(state.geburtsdatum, state.geschlecht);
       const file = formular === 'jugend' ? 'passantrag_jugend.pdf' : 'passantrag_senioren.pdf';
       const bytes = await fetch(file).then(r => { if(!r.ok) throw new Error('PDF-Vorlage nicht gefunden: '+file); return r.arrayBuffer(); });
 
@@ -642,38 +712,47 @@
       const helv = await doc.embedFont(StandardFonts.Helvetica);
 
       const setT = (name, value) => { try { form.getTextField(name).setText(value || ''); } catch(e){} };
-      const gd = fmtDe(state.geburtsdatum);
+      const gd = state.geburtsdatum ? fmtDe(state.geburtsdatum) : '';
 
+      // Vereins-Daten — immer (beide Modi)
       setT('Vereinsnummer 4stellig', '6256');
       setT('Vereinsname', 'Post SV Nürnberg e.V.');
-      setT('Familienname', val('familienname'));
-      setT('Vorname', val('vorname'));
-      setT('Geburtsdatum', gd);
-      setT('Geburtsort', val('geburtsort'));
-      setT('Staatsangehörigkeit siehe auch nächste Seite', val('nationalitaet'));
-      setT('Straße HausNr', val('strasse'));
-      setT('PLZ', val('plz'));
-      setT('Wohnort', val('wohnort'));
-      if (state.antragstyp === 'vereinswechsel') {
-        setT('Letzter Verein', val('letzterVerein'));
-        const pn1 = val('passnummer1'), pn2 = val('passnummer2');
-        if (pn1) setT('Passnummer1', pn1);
-        if (pn2) setT('Passnummer2', pn2);
-      }
 
-      // Geschlecht (Group1) — robust über Teilstring, da ä-Encoding variiert
-      try {
-        const g1 = form.getRadioGroup('Group1');
-        const opts = g1.getOptions();
-        const target = state.geschlecht === 'weiblich'
-          ? opts.find(o => o.toLowerCase().includes('weib'))
-          : opts.find(o => o.toLowerCase().includes('weib') === false);
-        if (target) g1.select(target);
-      } catch(e){}
+      // Persönliche Daten + Adressen — nur im Ausfüllen-Modus
+      if (state.modus === 'ausfuellen') {
+        setT('Familienname', val('familienname'));
+        setT('Vorname', val('vorname'));
+        setT('Geburtsdatum', gd);
+        setT('Geburtsort', val('geburtsort'));
+        setT('Staatsangehörigkeit siehe auch nächste Seite', val('nationalitaet'));
+        setT('Straße HausNr', val('strasse'));
+        setT('PLZ', val('plz'));
+        setT('Wohnort', val('wohnort'));
+        if (state.antragstyp === 'vereinswechsel') {
+          setT('Letzter Verein', val('letzterVerein'));
+          const pn1 = val('passnummer1'), pn2 = val('passnummer2');
+          if (pn1) setT('Passnummer1', pn1);
+          if (pn2) setT('Passnummer2', pn2);
+        }
+        // Geschlecht (Group1)
+        try {
+          const g1 = form.getRadioGroup('Group1');
+          const opts = g1.getOptions();
+          const target = state.geschlecht === 'weiblich'
+            ? opts.find(o => o.toLowerCase().includes('weib'))
+            : opts.find(o => o.toLowerCase().includes('weib') === false);
+          if (target) g1.select(target);
+        } catch(e){}
+        // Wechselgrund (Group3, Seite 2)
+        if (state.antragstyp === 'vereinswechsel') {
+          const grund = document.getElementById('wechselgrund').value;
+          if (grund !== '') {
+            try { form.getRadioGroup('Group3').acroField.setValue(PDFName.of(grund)); } catch(e){}
+          }
+        }
+      } // end ausfuellen-only
 
-      // Antragstyp (Group2): Jugend 1=Erst,2=Wechsel | Senioren 2=Erst,5=Wechsel
-      // pdf-lib liest numerische Optionswerte falsch aus (select() schlägt fehl)
-      // → Wert direkt am AcroField setzen.
+      // Antragstyp (Group2) — immer setzen (beide Modi)
       try {
         const g2 = form.getRadioGroup('Group2');
         let v;
@@ -682,16 +761,7 @@
         g2.acroField.setValue(PDFName.of(v));
       } catch(e){}
 
-      // Wechselgrund (Group3, Seite 2) — nur bei Vereinswechsel und wenn gewählt
-      if (state.antragstyp === 'vereinswechsel') {
-        const grund = document.getElementById('wechselgrund').value;
-        if (grund !== '') {
-          try { form.getRadioGroup('Group3').acroField.setValue(PDFName.of(grund)); } catch(e){}
-        }
-      }
-
       form.updateFieldAppearances(helv);
-
       // ── Mitgliedsantrag anhängen + vorausfüllen ──────────────────────────
       try {
         const mitR = await fetch('mitgliedsantrag.pdf');
@@ -748,7 +818,9 @@
 
       document.getElementById('resultTop').classList.remove('error');
       document.getElementById('resKicker').textContent = '✓ Antrag erfolgreich erstellt';
-      document.getElementById('resHeadline').textContent = val('vorname') + ' ' + val('familienname');
+      const nameVal = (val('vorname') + ' ' + val('familienname')).trim();
+      document.getElementById('resHeadline').textContent = nameVal
+        || (formular === 'jugend' ? 'Junioren / Juniorinnen' : 'Herren / Senioren / Frauen');
 
       const docs = buildDocs();
       const docsHtml = docs.length ? '<br><br><strong>Unbedingt beifügen:</strong><br>• ' + docs.join('<br>• ') : '';
@@ -757,13 +829,18 @@
         const gsel = document.getElementById('wechselgrund');
         if (gsel.value !== '') grundHtml = '<br>Wechselgrund: <strong>' + gsel.options[gsel.selectedIndex].text + '</strong>';
       }
-      // Abschluss-Text: gegendert + altersabhängig + antragsabhängig
-      const anWen = ctx.adult
-        ? (ctx.female ? 'an die Spielerin'                   : 'an den Spieler')
-        : (ctx.female ? 'an die Spielerin / Erziehungsberechtigte' : 'an den Spieler / Erziehungsberechtigten');
-      const abschluss = state.antragstyp === 'vereinswechsel'
-        ? 'Seite 3 (Einverständniserklärung) ist mit ausgefüllt. Bitte ' + anWen + ' zur Unterschrift weiterleiten.'
-        : 'Bitte ' + anWen + ' zur Unterschrift weiterleiten.';
+      // Abschluss-Text: modus-/geschlechts-/altersabhängig
+      let abschluss;
+      if (state.modus === 'weiterleiten') {
+        abschluss = 'Blanke Vorlagen beigefügt — Spieler/in füllt alle Felder selbst aus.';
+      } else {
+        const anWen = ctx.adult
+          ? (ctx.female ? 'an die Spielerin'                   : 'an den Spieler')
+          : (ctx.female ? 'an die Spielerin / Erziehungsberechtigte' : 'an den Spieler / Erziehungsberechtigten');
+        abschluss = state.antragstyp === 'vereinswechsel'
+          ? 'Seite 3 (Einverständniserklärung) ist mit ausgefüllt. Bitte ' + anWen + ' zur Unterschrift weiterleiten.'
+          : 'Bitte ' + anWen + ' zur Unterschrift weiterleiten.';
+      }
       document.getElementById('resMeta').innerHTML =
         'Formular: <strong>' + (formular === 'jugend' ? 'Junioren / Juniorinnen' : 'Herren / Senioren / Frauen') + '</strong><br>' +
         'Art: <strong>' + (state.antragstyp === 'erstausstellung' ? 'Erstausstellung' : 'Vereinswechsel') + '</strong>' + grundHtml + '<br>' +
@@ -787,6 +864,29 @@
   // === WhatsApp-Nachricht kopieren ===
   function buildWhatsAppText() {
     const name = val('vorname') + ' ' + val('familienname');
+
+    // ── Modus: Weiterleiten ────────────────────────────────────────────────
+    if (state.modus === 'weiterleiten') {
+      const nameStr = name.trim() || 'euren Spieler / eure Spielerin';
+      const sign = state.formulartyp_manuell === 'senioren'
+        ? 'Passantrag unterschreiben — Spieler / Spielerin'
+        : 'Passantrag unterschreiben — Spieler/in + Erziehungsberechtigte/r';
+      let t = 'Hallo,\n\n'
+        + 'anbei die Antragsformulare für ' + nameStr + ' (Post SV Nürnberg e.V.).\n\n'
+        + 'Bitte folgendes erledigen:\n\n'
+        + '1. ' + sign + '\n\n'
+        + '2. Mitgliedsantrag vollständig ausfüllen;\n'
+        + 'Seite 2 muss unbedingt 3× unterschrieben und Bankverbindung ausgefüllt sein!\n\n'
+        + '3. Alle Unterlagen als Foto per WhatsApp an mich zurückschicken:\n'
+        + '• Passantrag (ausgefüllt & unterschrieben)\n'
+        + '• Mitgliedsantrag (ausgefüllt & unterschrieben)';
+      if (state.antragstyp === 'erstausstellung')
+        t += '\n• Kopie Reisepass oder Personalausweis';
+      t += '\n\nBei Fragen jederzeit melden! 🙏';
+      return t;
+    }
+
+    // ── Modus: Ausfüllen ───────────────────────────────────────────────────
     const c = playerCtx();
     // Schritt 1: wer muss unterschreiben?
     const unterzeichner = c.adult
