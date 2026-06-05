@@ -292,7 +292,7 @@
 
 <div class="page-foot">
   POST SV NÜRNBERG · 6256<br>
-  VERSION 2.9.6 · 04.06.2026</div>
+  VERSION 2.10.0 · 05.06.2026</div>
 
 <!-- Menü -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -552,7 +552,6 @@
     docs.push('Kopie des <strong>Reisepasses / Personalausweises</strong> ' + c.desSpIn + '.');
     if (c.needsMelde)
       docs.push('<strong>Meldebescheinigung</strong> ' + c.desSpIn + ' UND der Eltern (nicht-deutsche Staatsangehörigkeit ab 10 Jahren).');
-    docs.push('<strong>Mitgliedsantrag</strong> vollständig ausgefüllt; Seite 2 muss <strong>3× unterschrieben</strong> sein!');
     return docs;
   }
   function updateDocNotice(){
@@ -625,7 +624,7 @@
       : 'Passantrag ' + mitErz + ' senden und unterschreiben lassen (ab E-Jugend muss Erziehungsberechtigte/r <strong>UND</strong> ' + ctx.sp + ' unterschreiben!).';
     document.getElementById('stepsList').innerHTML = [
       s1,
-      'Im Passantrag beigefügten Mitgliedsantrag vollständig ausfüllen und ebenfalls unterschreiben lassen.',
+      'Im Passantrag beigefügten Mitgliedsantrag: Straße, PLZ/Ort, Telefon, E-Mail, IBAN ergänzen — und <strong>Seite 2 unbedingt 3× unterschreiben</strong> lassen.',
       '<strong>ALLE</strong> erforderlichen Unterlagen (siehe auch Hinweise oben) als Bild an Kristian per WhatsApp schicken.',
       'Kristian reicht Passantrag online über SpielPlus beim BFV ein.',
       'Trainer schickt Mitgliedsantrag an die Geschäftsstelle — <a href="mailto:info@post-sv.de" style="color:var(--ink)">info@post-sv.de</a>',
@@ -692,6 +691,40 @@
       }
 
       form.updateFieldAppearances(helv);
+
+      // ── Mitgliedsantrag anhängen + vorausfüllen ──────────────────────────
+      try {
+        const mitR = await fetch('mitgliedsantrag.pdf');
+        if (!mitR.ok) throw new Error('mitgliedsantrag.pdf nicht gefunden');
+        const mitBytes = await mitR.arrayBuffer();
+        const mitDoc   = await PDFDocument.load(mitBytes);
+        const mitForm  = mitDoc.getForm();
+        const helv2    = await mitDoc.embedFont(StandardFonts.Helvetica);
+        const fmtGebu  = state.geburtsdatum
+          ? String(state.geburtsdatum.getDate()).padStart(2,'0') + '.' +
+            String(state.geburtsdatum.getMonth()+1).padStart(2,'0') + '.' +
+            state.geburtsdatum.getFullYear()
+          : '';
+        // Persönliche Daten
+        try { mitForm.getTextField('Name').setText(val('familienname'));   } catch(e){}
+        try { mitForm.getTextField('Vorname').setText(val('vorname'));     } catch(e){}
+        try { mitForm.getTextField('Geburtsdatum').setText(fmtGebu);      } catch(e){}
+        // Geschlecht
+        try {
+          if (ctx.female) { mitForm.getCheckBox('Checkbox_weiblich').check(); }
+          else            { mitForm.getCheckBox('Checkbox_männlich').check(); }
+        } catch(e){}
+        // Standardwerte: Einzelmitgliedschaft + Fußball
+        try { mitForm.getCheckBox('Checkbox_Einzelmitgliedschaft').check(); } catch(e){}
+        try { mitForm.getCheckBox('Checkbox_Fussball').check();             } catch(e){}
+        mitForm.updateFieldAppearances(helv2);
+        const mitPages = await doc.copyPages(mitDoc, mitDoc.getPageIndices());
+        mitPages.forEach(p => doc.addPage(p));
+      } catch (mitErr) {
+        console.warn('Mitgliedsantrag konnte nicht angehängt werden:', mitErr.message);
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
       const out = await doc.save();
 
       const blob = new Blob([out], { type: 'application/pdf' });
