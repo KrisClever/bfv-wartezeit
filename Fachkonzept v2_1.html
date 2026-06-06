@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fachkonzept Belegungsmanagement v2.1 — Post SV Nürnberg</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@400;600&display=swap');
+:root {
+  --navy:#1A3F6F; --blue:#2E75B6; --orange:#C55A11;
+  --lblue:#DEEAF1; --lgray:#F5F5F5; --mgray:#D9D9D9;
+  --green:#2F5C1E; --lgreen:#E8F2E3; --lyell:#FFF8E1;
+  --body:#1A1D2E; --muted:#555;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Sans 3',Arial,sans-serif;font-size:14px;line-height:1.6;color:var(--body);background:#fff}
+.print-btn{position:fixed;top:12px;right:12px;background:var(--navy);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;z-index:999;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+@media print{.print-btn{display:none}}
+.doc{max-width:780px;margin:0 auto;padding:28px 32px 60px}
+/* COVER */
+.cover{text-align:center;padding:60px 20px 80px;border-bottom:3px solid var(--navy);margin-bottom:40px}
+.cover .org{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.cover .sub{font-size:13px;color:var(--muted);margin-bottom:36px}
+.cover .tline{height:3px;background:var(--navy);margin:20px auto;width:100%}
+.cover h1{font-size:40px;font-weight:700;color:var(--navy);letter-spacing:-.01em;margin:20px 0 10px}
+.cover .subtitle{font-size:18px;color:var(--blue);margin-bottom:24px}
+.cover .meta{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:20px}
+.cover .ver{font-size:14px;color:var(--muted);margin-bottom:6px}
+.cover .status{font-size:14px;color:var(--orange);font-weight:600}
+/* HEADINGS */
+h1.sec{font-size:20px;font-weight:700;color:var(--navy);border-bottom:2px solid var(--navy);padding-bottom:6px;margin:40px 0 14px}
+h2.sec{font-size:16px;font-weight:700;color:var(--blue);margin:28px 0 10px}
+h3.sec{font-size:14px;font-weight:700;color:var(--muted);margin:18px 0 8px}
+/* PARAGRAPHS */
+p{margin-bottom:10px}
+ul,ol{padding-left:22px;margin-bottom:10px}
+li{margin-bottom:4px}
+/* TABLES */
+.tbl-wrap{overflow-x:auto;margin:12px 0 18px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--navy);color:#fff;padding:7px 10px;text-align:left;font-weight:600}
+td{padding:7px 10px;border:1px solid #ccc;vertical-align:top}
+tr:nth-child(even) td{background:#fafafa}
+.th-c{text-align:center}
+.td-c{text-align:center}
+.fill-g{background:var(--lgray)!important}
+.fill-b{background:var(--lblue)!important}
+.fill-y{background:var(--lyell)!important}
+.fill-ok{background:var(--lgreen)!important}
+.yes{color:var(--green);font-weight:700}
+.no{color:#999}
+/* CODE */
+pre{background:var(--lgray);border-radius:6px;padding:14px 16px;font-family:'Courier New',monospace;font-size:12px;line-height:1.5;overflow-x:auto;margin:10px 0 16px;white-space:pre-wrap}
+/* INFOBOX */
+.info{background:var(--lblue);border-left:4px solid var(--blue);padding:10px 14px;border-radius:0 6px 6px 0;margin:12px 0;font-size:13px;color:var(--muted);font-style:italic}
+.info.yellow{background:var(--lyell);border-color:var(--orange)}
+/* BADGES */
+.badge-new{background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+/* CHANGELOG */
+.chg{margin-bottom:6px;padding-left:16px;position:relative;font-size:13px}
+.chg::before{content:'•';position:absolute;left:0;color:var(--blue)}
+/* FOOTER */
+.page-break{page-break-before:always}
+@media print{
+  body{font-size:11px}
+  .doc{padding:16px 20px}
+  h1.sec{font-size:16px}
+  h2.sec{font-size:13px}
+  pre{font-size:10px}
+  table{font-size:11px}
+}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨 Als PDF speichern</button>
+<div class="doc">
+
+<!-- COVER -->
+<div class="cover">
+  <div class="org">Post SV Nürnberg e.V.</div>
+  <div class="sub">Fußballabteilung</div>
+  <div class="tline"></div>
+  <h1>FACHKONZEPT</h1>
+  <div class="subtitle">Digitales Platzbelegungs-Management-System</div>
+  <div class="meta">46 Mannschaften · 2 Standorte · Firebase + GitHub Pages</div>
+  <div class="ver">Version 2.1 · Juni 2026</div>
+  <div class="status">Status: Aktualisierter Entwurf zur Vorlage beim Vorstand</div>
+</div>
+
+<!-- ÄNDERUNGSHISTORIE -->
+<h1 class="sec">Änderungshistorie</h1>
+<div class="tbl-wrap"><table>
+<tr><th>Version</th><th>Datum</th><th>Änderungen</th></tr>
+<tr><td>1.0</td><td>Jun 2026</td><td>Erstversion — Grundkonzept, Rollen, Datenmodell, Roadmap</td></tr>
+<tr><td>2.0</td><td>Jun 2026</td><td>Echtdaten Ebensee + Schweinau; Datenmodell erweitert; Serientermine Phase 1; Bulk-Upload; Roadmap 50 Tage</td></tr>
+<tr class="fill-y"><td><strong>2.1</strong></td><td>Jun 2026</td><td><strong>Neu:</strong> „1-Minute-Lücke"-Regel · Segment-Sperren · Kompaktfeld-Grenzkonfiguration · Konfliktlösungs-Matrix bei Prio-Gleichstand · Rolling 4-Wochen-Vorschau · Levenshtein Fuzzy-Matching BFV-Import</td></tr>
+</table></div>
+
+<!-- EINLEITUNG -->
+<h1 class="sec">1. Einleitung und Zielbild</h1>
+<p>Der Post SV Nürnberg betreibt eine Fußballabteilung mit aktuell 46 Mannschaften an zwei Standorten: <strong>Ebensee</strong> (Ziegenstr. 110, 90482 Nürnberg) und <strong>Schweinau</strong> (Daimlerstr. 71, 90441 Nürnberg). Die Belegungsplanung erfolgte historisch in Excel, wurde zeitaufwändig als PDF exportiert und manuell via WhatsApp verteilt.</p>
+<div class="info yellow">Zielbild: Der Verein verwaltet Ressourcen — das System entscheidet automatisiert nach vordefinierten Regeln, sodass Freigeber nur noch bei echten Konflikten eingreifen müssen.</div>
+
+<h2 class="sec">1.1 Plätze Ebensee</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Platz</th><th>Belag</th><th>FL</th><th>Nutzung (Spiel)</th><th>Teilbarkeit (Tr.)</th><th>Platzsperre</th></tr>
+<tr><td>A-Platz</td><td>Rasen</td><td>Nein</td><td>Nur Großfeld (Ausnahme)</td><td>1, ½, ⅓, ¼</td><td>Mo–Fr 22–15h; nach Sonnenunterg.</td></tr>
+<tr><td>B-Platz</td><td>Rasen</td><td>Nein</td><td>Groß/Kompakt/2×Klein</td><td>1, ½, ⅓, ¼</td><td>Mo–Fr 22–15h; nach Sonnenunterg.</td></tr>
+<tr><td>Kleinfeld (Rasen)</td><td>Rasen</td><td>Ja</td><td>1 Kleinfeld</td><td>1 oder ½</td><td>Mo–Fr 22–15h · <em>bis Ende Okt 2026</em></td></tr>
+<tr><td>Kleinfeld (KR)</td><td>Kunstrasen</td><td>Ja</td><td>Kompakt/2×Klein</td><td>1 oder ½</td><td>Keine · <em>ab Nov 2026</em></td></tr>
+<tr><td>Kunstrasen</td><td>Kunstrasen</td><td>Ja</td><td>Groß/Kompakt/2×Klein</td><td>1, ½, ⅓, ¼</td><td>Keine</td></tr>
+<tr><td>Wiesengrund</td><td>Rasen</td><td>Nein</td><td>Kompakt/2×Klein</td><td>½, ⅓, ¼</td><td>Nach Sonnenuntergang</td></tr>
+<tr><td>Käfig</td><td>Kunstrasen</td><td>Ja</td><td>—</td><td>Ganz oder ½</td><td>Keine · Nicht für Herren/A–C-Jgd</td></tr>
+</table></div>
+
+<h2 class="sec">1.2 Plätze Schweinau</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Platz</th><th>Belag</th><th>FL</th><th>Nutzung</th><th>Teilbarkeit</th><th>Platzsperre</th></tr>
+<tr><td>A-Platz</td><td>Rasen</td><td>Ja</td><td>Groß/Kompakt/2×Klein</td><td>1, ½, ⅓, ¼</td><td>Mo–Fr 21–15h; Dez–Mär ganztags</td></tr>
+<tr><td>B-Platz</td><td>Acker</td><td>Ja</td><td>Groß/Kompakt/2×Klein</td><td>1, ½, ⅓, ¼</td><td>Keine</td></tr>
+<tr><td>C-Platz</td><td>Rasen</td><td>Ja</td><td>Groß oder Kompakt</td><td>1, ½, ⅓, ¼</td><td>Mo–Fr 21–15h; Dez–Mär ganztags</td></tr>
+</table></div>
+
+<h2 class="sec">1.3 Mannschaftskategorien</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Kategorie</th><th>Spielfeld (Spiel)</th><th>Training</th><th>Käfig</th></tr>
+<tr><td>Herren/Frauen, A–C-Jugend, U17w–U15w</td><td>Großfeld</td><td>1, ½ oder Kompaktfeld; ⅓/¼ nur Notfall</td><td class="td-c"><span class="no">–</span></td></tr>
+<tr><td>D-Jugend / U13w</td><td>Kompaktfeld (oder Großfeld Twin)</td><td>1,½,⅓,¼ Groß oder Kompaktfeld oder Käfig</td><td class="td-c"><span class="yes">✓</span></td></tr>
+<tr><td>E–G-Jugend / U11w</td><td>Kleinfeld</td><td>½,⅓,¼ Groß oder Kompaktfeld oder Käfig</td><td class="td-c"><span class="yes">✓</span></td></tr>
+<tr><td>Sonder (Altherren, Walking Football, Inklusion)</td><td>Alle Größen</td><td>½,⅓,¼ oder Käfig (Inklusion: nur Käfig)</td><td class="td-c"><span class="yes">✓</span></td></tr>
+</table></div>
+
+<h2 class="sec">1.4 Spielformat-Zeitdauern</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Mannschaft</th><th>Liga gesamt</th><th>Pokal</th><th>Freundschaft</th></tr>
+<tr><td>Herren / Frauen / A-Junioren</td><td>150 Min (2h30)</td><td>160 Min</td><td>140–150 Min</td></tr>
+<tr><td>B-Junioren</td><td>140 Min (2h20)</td><td>150 Min</td><td>130–140 Min</td></tr>
+<tr><td>C-Junioren</td><td>130 Min (2h10)</td><td>140 Min</td><td>120–130 Min</td></tr>
+<tr><td>D-Junioren</td><td>100 Min (1h40)</td><td>110 Min</td><td>95–105 Min</td></tr>
+<tr><td>E-Junioren</td><td>80–90 Min</td><td>90–100 Min</td><td>75–90 Min</td></tr>
+<tr><td>F/G-Junioren</td><td>90–120 Min (Turnier)</td><td>—</td><td>60–90 Min</td></tr>
+<tr><td>Entwicklungsliga / Förderliga</td><td>150 Min</td><td>—</td><td>—</td></tr>
+</table></div>
+
+<!-- SYSTEMARCHITEKTUR -->
+<h1 class="sec page-break">2. Systemarchitektur (Firebase)</h1>
+<div class="tbl-wrap"><table>
+<tr><th>Komponente</th><th>Funktion</th><th>Plan</th></tr>
+<tr><td>Firebase Firestore</td><td>Echtzeit-Datenbank für alle Buchungen, Stammdaten, Logs</td><td>Kostenlos (Spark)</td></tr>
+<tr><td>Firebase Authentication</td><td>Login (E-Mail/Passwort, Google SSO)</td><td>Kostenlos</td></tr>
+<tr><td>Firebase Cloud Functions</td><td>Auto-Approval, Benachrichtigungen, Excel-Import, Reports</td><td>Kostenlos</td></tr>
+<tr><td>Firebase Cloud Messaging</td><td>Push-Benachrichtigungen für alle Rollen</td><td>Kostenlos</td></tr>
+<tr><td>Firebase Security Rules</td><td>Zugriffskontrolle serverseitig</td><td>Inklusive</td></tr>
+</table></div>
+
+<!-- ROLLEN -->
+<h1 class="sec">3. Rollen- und Berechtigungsmodell</h1>
+<p><strong>Systemadministrator</strong> — Technischer und fachlicher Eigentümer. Vollzugriff. Typisch: Abteilungsleitung.</p>
+<p><strong>Platzmanager</strong> — Operative Belegungsverantwortung. Typisch: Sportlicher Leiter, Platzbeauftragter.</p>
+<p><strong>Trainer</strong> — Ressourcennutzer. Kann Anfragen stellen und Plan einsehen. Keine Direktfreigaben.</p>
+
+<h2 class="sec">3.1 Berechtigungsmatrix</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Berechtigung</th><th class="th-c">Admin</th><th class="th-c">Platz-Mgr</th><th class="th-c">Trainer</th></tr>
+<tr><td>Benutzerverwaltung</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c"><span class="no">–</span></td><td class="td-c"><span class="no">–</span></td></tr>
+<tr><td>Stammdaten (Plätze, Teams, Standorte)</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c"><span class="no">–</span></td><td class="td-c"><span class="no">–</span></td></tr>
+<tr><td>Serientermine anlegen / ändern</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c"><span class="no">–</span></td></tr>
+<tr><td>Bulk-Upload Excel importieren</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c"><span class="no">–</span></td></tr>
+<tr><td>Buchungsanfragen genehmigen / ablehnen</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c"><span class="no">–</span></td></tr>
+<tr><td>Platzsperren setzen</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c"><span class="no">–</span></td></tr>
+<tr><td>Belegungsplan einsehen</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td></tr>
+<tr><td>Slot-Anfrage stellen</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td></tr>
+<tr><td>Tauschanfrage stellen</td><td class="td-c"><span class="no">–</span></td><td class="td-c"><span class="no">–</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td></tr>
+</table></div>
+
+<!-- DATENMODELL -->
+<h1 class="sec page-break">4. Datenmodell (Firestore Collections)</h1>
+<pre>users            Benutzer + Rollen
+teams            Mannschaften + Prioritäten + Feldkategorie
+locations        Standorte
+facilities       Plätze/Hallen mit Konfigurationen   ← erweitert v2.0
+series           Serientermine (RRULE)                ← NEU v2.0
+bookings         Materialisierte Einzeltermine
+bookingRequests  Anfragen mit Status-Workflow
+seasons          Sommer/Winter-Saisons + Ferien        ← NEU v2.0
+notifications    Benachrichtigungs-Queue
+auditLogs        Unveränderliches Änderungsprotokoll
+settings         Systemparameter</pre>
+
+<h2 class="sec">4.1 Collection: teams</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Feld</th><th>Typ</th><th>Pflicht</th><th>Beschreibung</th></tr>
+<tr><td>fieldSizeCategory</td><td>string</td><td class="td-c"><span class="yes">✓</span></td><td>grossfeld | kompaktfeld | kleinfeld</td></tr>
+<tr><td>canUseKaefig</td><td>boolean</td><td class="td-c"><span class="yes">✓</span></td><td>Ob Mannschaft den Käfig nutzen darf</td></tr>
+<tr><td>spielformat</td><td>string</td><td class="td-c"><span class="yes">✓</span></td><td>herren | a-junioren | ... | sonder</td></tr>
+<tr><td>priority</td><td>number</td><td class="td-c"><span class="yes">✓</span></td><td>Buchungspriorität 0–100</td></tr>
+<tr><td>homeFacilityId</td><td>string</td><td class="td-c"><span class="no">–</span></td><td>Stammplatz (für Gleichstand-Auflösung)</td></tr>
+<tr><td>trainerIds</td><td>string[]</td><td class="td-c"><span class="no">–</span></td><td>Verknüpfte Trainer-UIDs</td></tr>
+</table></div>
+
+<h2 class="sec">4.2 Collection: facilities</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Feld</th><th>Typ</th><th>Pflicht</th><th>Beschreibung</th></tr>
+<tr><td>belag</td><td>string</td><td class="td-c"><span class="yes">✓</span></td><td>rasen | kunstrasen | acker | asche</td></tr>
+<tr><td>flutlicht</td><td>boolean</td><td class="td-c"><span class="yes">✓</span></td><td>Flutlicht vorhanden</td></tr>
+<tr><td>sunsetRestriction</td><td>boolean</td><td class="td-c"><span class="yes">✓</span></td><td>Keine Nutzung nach Sonnenuntergang</td></tr>
+<tr><td>fieldConfigurations</td><td>object[]</td><td class="td-c"><span class="yes">✓</span></td><td>[{size, label, maxParallel}]</td></tr>
+<tr><td>allowedTeamCategories</td><td>string[]</td><td class="td-c"><span class="yes">✓</span></td><td>[grossfeld, kompaktfeld, kleinfeld]</td></tr>
+<tr><td>divisibility</td><td>string[]</td><td class="td-c"><span class="yes">✓</span></td><td>[full, half, third, quarter]</td></tr>
+<tr><td>seasonalAvailability</td><td>object</td><td class="td-c"><span class="no">–</span></td><td>{from, to, reason}</td></tr>
+<tr><td>recurringBlockings</td><td>object[]</td><td class="td-c"><span class="no">–</span></td><td>Wiederkehrende Wartungssperren</td></tr>
+</table></div>
+
+<h2 class="sec">4.3 Collection: series <span class="badge-new">NEU</span></h2>
+<div class="tbl-wrap"><table>
+<tr><th>Feld</th><th>Typ</th><th>Pflicht</th><th>Beschreibung</th></tr>
+<tr><td>rrule</td><td>string</td><td class="td-c"><span class="yes">✓</span></td><td>RFC 5545: FREQ=WEEKLY;BYDAY=TU,TH;UNTIL=20260630</td></tr>
+<tr><td>skipHolidays</td><td>boolean</td><td class="td-c"><span class="yes">✓</span></td><td>Bayerische Ferien + Feiertage automatisch überspringen</td></tr>
+<tr><td>exceptions</td><td>object[]</td><td class="td-c"><span class="no">–</span></td><td>[{date, reason, newStart, newEnd, newFacilityId}]</td></tr>
+<tr><td>seasonId</td><td>string</td><td class="td-c"><span class="yes">✓</span></td><td>Referenz auf seasons-Collection</td></tr>
+<tr><td>fieldConfiguration</td><td>string</td><td class="td-c"><span class="yes">✓</span></td><td>full | half | third | quarter | compact | small</td></tr>
+</table></div>
+
+<!-- BUCHUNGS-WORKFLOW -->
+<h1 class="sec page-break">5. Buchungs-Workflow und Freigabeprozess</h1>
+<div class="tbl-wrap"><table>
+<tr><th>Status</th><th>Auslöser</th><th>Nächste Aktion</th></tr>
+<tr><td>ANGEFRAGT</td><td>Trainer stellt Anfrage</td><td>Cloud Function prüft Kompatibilität + Konflikte</td></tr>
+<tr class="fill-ok"><td>BESTÄTIGT (auto)</td><td>Kein Konflikt erkannt</td><td>Push an Trainer</td></tr>
+<tr><td>IN PRÜFUNG</td><td>Konflikt oder Inkompatibilität</td><td>Platzmanager wird benachrichtigt</td></tr>
+<tr><td>ALTERNATIVVORSCHLAG</td><td>Platzmanager schlägt anderen Slot vor</td><td>Trainer akzeptiert / lehnt ab</td></tr>
+<tr class="fill-ok"><td>BESTÄTIGT</td><td>Platzmanager genehmigt manuell</td><td>Push an alle Betroffenen</td></tr>
+<tr><td>ABGELEHNT</td><td>Platzmanager lehnt ab</td><td>Push mit Begründung an Trainer</td></tr>
+<tr><td>STORNIERT</td><td>Trainer oder Manager storniert</td><td>Slot frei, Audit-Log</td></tr>
+</table></div>
+
+<!-- DATENVALIDIERUNG v2.1 -->
+<h1 class="sec">5a. Datenvalidierung &amp; Edge Cases <span class="badge-new">v2.1</span></h1>
+<div class="info yellow">Diese Regeln erzwingt das Backend automatisch bei jeder Buchung. Sie verhindern logische Inkonsistenzen bei der Materialisierung von Serien.</div>
+
+<h2 class="sec">5a.1 „1-Minute-Lücke"-Regel</h2>
+<p>Direkt aufeinanderfolgende Buchungen auf demselben Feldsegment sind systemseitig zulässig. Das System <em>empfiehlt</em> Trainern einen 5-Minuten-Puffer, blockiert aber nicht autonom.</p>
+<pre>Team A bis 18:30 → Team B ab 18:30  ✓ zulässig
+                               + Empfehlung: "5 Min Puffer eintragen?"</pre>
+
+<h2 class="sec">5a.2 Überlappende Teilbarkeiten (Segment-Sperre)</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Gebuchtes Segment</th><th>Automatisch gesperrt</th></tr>
+<tr><td>Großfeld (voll)</td><td>half, third, quarter derselben facilityId</td></tr>
+<tr><td>Großfeld (½)</td><td>Gesamtes Großfeld (voll)</td></tr>
+<tr><td>Kompaktfeld (voll)</td><td>2/3 des Platzes gesperrt; restliches ⅓ → Status „Eingeschränkt (nur Kleingruppen ohne Tor)"</td></tr>
+</table></div>
+<pre>onBookingConfirmed(booking):
+  if booking.fieldConfiguration === "full":
+    blockSegments(facilityId, date, start, end, ["half","third","quarter"])
+  if booking.fieldConfiguration === "compact":
+    markSegmentRestricted(facilityId, "third", "Nur Kleingruppen ohne Torbedarf")
+  if booking.fieldConfiguration in ["half","third","quarter"]:
+    blockSegments(facilityId, date, start, end, ["full"])</pre>
+
+<!-- SERIENTERMINE -->
+<h1 class="sec page-break">6. Serientermine / Wiederkehrende Buchungen <span class="badge-new">NEU v2.0</span></h1>
+<div class="info">Ein Serientermin statt 40 Einzelbuchungen pro Saison. Die Cloud Function generateWeeklyPlan materialisiert wöchentlich Buchungen für KW+4.</div>
+
+<h2 class="sec">6.1 RRULE-Patterns für Fußball</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Muster</th><th>RRULE</th><th>Beispiel</th></tr>
+<tr><td>Jeden Dienstag</td><td><code>FREQ=WEEKLY;BYDAY=TU;UNTIL=20260630</code></td><td>U13 Di 17:00–18:30</td></tr>
+<tr><td>Di + Do</td><td><code>FREQ=WEEKLY;BYDAY=TU,TH;UNTIL=20260630</code></td><td>1. Herren Di+Do 19:00–21:00</td></tr>
+<tr><td>Mo, Mi, Fr</td><td><code>FREQ=WEEKLY;BYDAY=MO,WE,FR</code></td><td>Intensive Trainingsgruppe</td></tr>
+<tr><td>Jeden 2. Samstag</td><td><code>FREQ=WEEKLY;INTERVAL=2;BYDAY=SA</code></td><td>Heimspiel jede 2. Woche</td></tr>
+</table></div>
+
+<h2 class="sec">6.2 Saisonwechsel-Assistent</h2>
+<pre>1. Admin startet "Neue Saison anlegen" (z.B. Winter 2025/26)
+2. System zeigt: Welche Serien laufen? Welche Rasenplätze gesperrt?
+3. Betroffene Trainer erhalten Push → nennen Alternativwunsch
+4. Platzmanager teilt Slots zu → Bulk-Bestätigung aller neuen Serien</pre>
+
+<h2 class="sec">6.3 Ferien-Management</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Feature</th><th>Beschreibung</th></tr>
+<tr><td>Automatisches Überspringen</td><td>skipHolidays=true → Ferientermine nicht materialisiert</td></tr>
+<tr><td>Push-Erinnerung</td><td>1 Woche vor Ferienstart Push: „Findet Training statt?"</td></tr>
+<tr><td>Freigabe</td><td>Nicht bestätigte Slots werden automatisch freigegeben</td></tr>
+</table></div>
+
+<!-- BULK UPLOAD -->
+<h1 class="sec page-break">7. Bulk-Upload via Excel <span class="badge-new">NEU v2.0</span></h1>
+
+<h2 class="sec">7.1 Excel-Template Training</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Spalte</th><th>Pflicht</th><th>Beispiel</th><th>Validierung</th></tr>
+<tr><td>Mannschaft</td><td class="td-c"><span class="yes">✓</span></td><td>U13 Süd</td><td>Muss im System existieren</td></tr>
+<tr><td>Standort</td><td class="td-c"><span class="yes">✓</span></td><td>Ebensee</td><td>Ebensee | Schweinau</td></tr>
+<tr><td>Platz</td><td class="td-c"><span class="yes">✓</span></td><td>Kunstrasen</td><td>Facility-Stammdaten</td></tr>
+<tr><td>Wochentag</td><td class="td-c"><span class="yes">✓</span></td><td>Di</td><td>Mo–So</td></tr>
+<tr><td>Von / Bis</td><td class="td-c"><span class="yes">✓</span></td><td>17:00 / 18:30</td><td>HH:MM, Bis nach Von</td></tr>
+<tr><td>Gültig ab / bis</td><td class="td-c"><span class="yes">✓</span></td><td>01.08.2025 / 30.06.2026</td><td>Innerhalb der Saison</td></tr>
+<tr><td>Feldkonfiguration</td><td class="td-c"><span class="no">–</span></td><td>halb</td><td>Kompatibilitätsprüfung</td></tr>
+</table></div>
+
+<h2 class="sec">7.2 BFV-Spielplan-Import + Fuzzy-Matching <span class="badge-new">v2.1</span></h2>
+<div class="info yellow">Der BFV liefert Spielpläne in unstrukturierten Excel-Tabellen mit abweichenden Schreibweisen. Version 2.1 löst das mit Fuzzy-Matching.</div>
+<div class="tbl-wrap"><table>
+<tr><th>Mechanismus</th><th>Beschreibung</th><th>Systemverhalten</th></tr>
+<tr><td>Vereinsnamens-Filter</td><td>Zeilen ohne „Post SV Nürnberg" werden ignoriert</td><td>Performance-schonend</td></tr>
+<tr><td>Levenshtein Fuzzy-Matching</td><td>„Post SV Nürnberg II", „SG Post SV / Altenfurt" etc. werden erkannt</td><td>≥85% → automatisch · &lt;85% → WARNUNG + manuelle Zuordnung</td></tr>
+<tr><td>Mapping-Cache</td><td>Manuelle Zuordnungen werden gespeichert</td><td>Folge-Importe funktionieren automatisch</td></tr>
+</table></div>
+<pre>fuzzyMatchTeam(importedName, teams):
+  if teams.find(t => t.name === importedName): return exact match
+  if !importedName.includes("Post SV"): return null  // ignorieren
+  best = teams.maxBy(t => levenshteinSimilarity(importedName, t.name))
+  if best.score >= 0.85: return { team: best, confidence: best.score }
+  return { status: "WARNUNG", confidence: best.score }</pre>
+
+<h2 class="sec">7.3 Ergebnis-Report</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Status</th><th>Bedeutung</th><th>Aktion</th></tr>
+<tr class="fill-ok"><td>✓ Importiert</td><td>Kein Konflikt, valide Daten</td><td>Direkt angelegt</td></tr>
+<tr><td>⚡ Konflikt</td><td>Zeitüberschneidung</td><td>Als Anfrage → Platzmanager entscheidet</td></tr>
+<tr class="fill-y"><td>⚠ Warnung</td><td>Ferien, kein Flutlicht, Fuzzy-Match &lt;85%</td><td>Importiert mit Hinweis / manuelle Zuordnung</td></tr>
+<tr><td>✕ Fehler</td><td>Pflichtfeld fehlt, Team unbekannt</td><td>Nicht importiert, Korrektur nötig</td></tr>
+</table></div>
+
+<!-- FELDKONFIGURATION -->
+<h1 class="sec page-break">8. Feldkonfigurationen und Kompatibilität <span class="badge-new">NEU v2.0</span></h1>
+<h2 class="sec">8.1 Kompatibilitätsmatrix Team × Platz</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Mannschaftskategorie</th><th class="th-c">Groß-/KR-Platz</th><th class="th-c">Wiesengrund</th><th class="th-c">Kleinfeld</th><th class="th-c">Käfig</th></tr>
+<tr><td>Herren/Frauen, A–C-Jugend, U17w–U15w</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c"><span class="no">–</span></td><td class="td-c"><span class="no">–</span></td><td class="td-c"><span class="no">–</span></td></tr>
+<tr><td>D-Jugend / U13w</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td></tr>
+<tr><td>E–G-Jugend / U11w</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td></tr>
+<tr><td>Sonder (Inklusion: nur Käfig)</td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td><td class="td-c fill-ok"><span class="yes">✓</span></td></tr>
+</table></div>
+
+<!-- PRIORISIERUNG -->
+<h1 class="sec">9. Priorisierungssystem</h1>
+<div class="tbl-wrap"><table>
+<tr><th>Priorität</th><th>Kategorie</th><th>Beispiele</th></tr>
+<tr class="fill-ok"><td>100</td><td>Ligabetrieb Aktive</td><td>1. Herren, 2. Herren, Damen</td></tr>
+<tr><td>95</td><td>A-Jugend Verbandsliga / Sonderformate</td><td>U19, Entwicklungsliga, Förderliga</td></tr>
+<tr><td>90</td><td>A/B-Jugend Bezirksliga</td><td>U19, U17</td></tr>
+<tr><td>85</td><td>C/D-Jugend höhere Klassen</td><td>U15, U13</td></tr>
+<tr><td>80</td><td>E–G-Jugend</td><td>U11, U9, U7</td></tr>
+<tr><td>70</td><td>Breitensport</td><td>Altherren, Walking Football</td></tr>
+<tr><td>60</td><td>Sondermannschaften</td><td>Inklusion, Privatmannschaften</td></tr>
+</table></div>
+
+<h2 class="sec">9.1 Konfliktlösungs-Matrix bei Prioritäts-Gleichstand <span class="badge-new">v2.1</span></h2>
+<div class="info yellow">Wenn zwei Anfragen dieselbe Priorität haben, entscheidet das System automatisch nach dieser 3-Stufen-Kaskade.</div>
+<div class="tbl-wrap"><table>
+<tr><th>Stufe</th><th>Kriterium</th><th>Systementscheidung</th></tr>
+<tr><td class="td-c fill-ok"><strong>1</strong></td><td>Stammplatz-Recht</td><td>Das Team, dessen homeFacilityId NICHT mit dem angefragten Platz übereinstimmt, verliert. Heimteams haben stets Vorrang.</td></tr>
+<tr><td class="td-c"><strong>2</strong></td><td>Historische Zuteilung (4 Wochen)</td><td>Das Team, das seltener auf dem Wunschplatz zugeteilt wurde, erhält den Zuschlag (Fairness-Algorithmus via Audit-Log).</td></tr>
+<tr><td class="td-c"><strong>3</strong></td><td>Zeitstempel (FiFo)</td><td>Bei identischer Historie entscheidet der exakte Zeitpunkt des Buchungseingangs.</td></tr>
+</table></div>
+<pre>resolveEqualPriorityConflict(reqA, reqB):
+  // Stufe 1: Stammplatz
+  if isHomeTeam(reqA.teamId, facilityId): return APPROVE reqA
+  if isHomeTeam(reqB.teamId, facilityId): return APPROVE reqB
+  // Stufe 2: Historische Häufigkeit (letzte 4 Wochen)
+  freqA = countBookingsLast4Weeks(reqA.teamId, facilityId)
+  freqB = countBookingsLast4Weeks(reqB.teamId, facilityId)
+  if freqA != freqB: return APPROVE min(freqA, freqB)
+  // Stufe 3: Zeitstempel
+  return reqA.createdAt < reqB.createdAt ? APPROVE reqA : APPROVE reqB</pre>
+
+<!-- CLOUD FUNCTIONS -->
+<h1 class="sec page-break">10. Cloud Functions</h1>
+<div class="tbl-wrap"><table>
+<tr><th>Function</th><th>Trigger</th><th>Beschreibung</th></tr>
+<tr><td>onBookingRequestCreated</td><td>Firestore write</td><td>Auto-Approval + Feldkompatibilitätsprüfung + Segment-Sperre</td></tr>
+<tr><td>generateWeeklyPlan</td><td>Cron Mo 06:00</td><td>Series → Bookings für KW+4 materialisieren</td></tr>
+<tr class="fill-y"><td>checkFerienCalendar</td><td>Cron täglich</td><td>1 Woche vor Ferien Push an alle Trainer mit Serientermin</td></tr>
+<tr class="fill-y"><td>processExcelImport</td><td>HTTP-Trigger</td><td>Excel parsen, validieren, Fuzzy-Matching, importieren</td></tr>
+<tr class="fill-y"><td>saisonwechselAssistent</td><td>HTTP-Trigger</td><td>Neue Saison vorbereiten, betroffene Serien identifizieren</td></tr>
+<tr><td>sendConflictDigest</td><td>Cron täglich 07:00</td><td>Offene Konflikte zusammengefasst an Platzmanager</td></tr>
+<tr><td>generateMonthlyReport</td><td>Cron 1. des Monats</td><td>Auslastungsbericht als PDF</td></tr>
+<tr><td>cleanupOldRequests</td><td>Cron wöchentlich</td><td>Requests &gt;14 Tage → Archiv-Dokument</td></tr>
+</table></div>
+
+<h2 class="sec">10.1 Datensparsamkeit &amp; Cloud-Ressourcen <span class="badge-new">v2.1</span></h2>
+<div class="tbl-wrap"><table>
+<tr><th>Mechanismus</th><th>Beschreibung</th></tr>
+<tr><td>Rolling Vorschau-Horizont</td><td>generateWeeklyPlan materialisiert maximal 4 Wochen (KW+4) im Voraus. Weiter liegende Termine existieren nur als RRULE in series — spart Firestore-Reads drastisch.</td></tr>
+<tr><td>Aufräum-Automatismus</td><td>cleanupOldRequests archiviert bookingRequests mit Status ANGEFRAGT / IN_PRÜFUNG die &gt;14 Tage alt sind zu einem einzelnen Archiv-Dokument.</td></tr>
+</table></div>
+
+<!-- ROADMAP -->
+<h1 class="sec page-break">11. MVP-Roadmap</h1>
+<div class="tbl-wrap"><table>
+<tr><th>Phase</th><th>Sprints</th><th>Features</th><th>Dauer</th></tr>
+<tr><td><strong>Phase 1</strong><br>Core + Serien</td><td>1–3</td><td>Firebase Setup · Auth · Stammdaten (inkl. Flutlicht/Belag/Feldkonfig) · Feldkompatibilitätsmatrix · Belegungsplan · Serientermine + Ausnahmen · Slot-Anfragen</td><td>6 Wo.</td></tr>
+<tr class="fill-b"><td><strong>Phase 2</strong><br>Automatisierung</td><td>4–5</td><td>Auto-Approval · Priorisierung · Bulk-Upload Excel (Training + BFV) · Ferien-Management · Saisonwechsel-Assistent · Push-Benachrichtigungen · Tauschangfragen · Audit-Log</td><td>4 Wo.</td></tr>
+<tr><td><strong>Phase 3</strong><br>Erweitert</td><td>6–7</td><td>Belegungsmatrix (Desktop) · Auslastungs-Dashboard · PDF-Export · PWA/Offline · KI-Konfliktlösung · LLM-Assistent (optional)</td><td>4 Wo.</td></tr>
+</table></div>
+
+<!-- AUFWAND -->
+<h1 class="sec">12. Aufwandsschätzung</h1>
+<div class="info yellow">Gegenüber v1.0 kommen 13 Tage hinzu für Serientermine, Feldkompatibilität, Bulk-Upload, Ferien-Management und Saisonwechsel-Assistent.</div>
+<div class="tbl-wrap"><table>
+<tr><th>Bereich</th><th>Phase</th><th>Tage</th><th>Δ v1.0</th></tr>
+<tr><td>Firebase Setup + Auth + Security Rules</td><td>P1</td><td>3</td><td>=</td></tr>
+<tr><td>Datenmodell + Stammdaten-CRUD (erweitert)</td><td>P1</td><td>5</td><td>+1</td></tr>
+<tr class="fill-y"><td>Feldkompatibilitätsmatrix</td><td>P1</td><td>2</td><td>★ NEU</td></tr>
+<tr><td>Belegungsplan (Tages-/Wochenansicht)</td><td>P1</td><td>4</td><td>=</td></tr>
+<tr class="fill-y"><td>Serientermine (RRULE + Ausnahmen)</td><td>P1</td><td>4</td><td>★ NEU (war P3)</td></tr>
+<tr><td>Auto-Approval (inkl. Feldkompatibilität)</td><td>P2</td><td>3</td><td>+1</td></tr>
+<tr class="fill-y"><td>Bulk-Upload Excel</td><td>P2</td><td>4</td><td>★ NEU</td></tr>
+<tr class="fill-y"><td>Ferien-Management</td><td>P2</td><td>2</td><td>★ NEU</td></tr>
+<tr class="fill-y"><td>Saisonwechsel-Assistent</td><td>P2</td><td>3</td><td>★ NEU</td></tr>
+<tr><td>Push-Benachrichtigungen</td><td>P2</td><td>2</td><td>=</td></tr>
+<tr><td>Belegungsmatrix + Dashboard</td><td>P3</td><td>5</td><td>=</td></tr>
+<tr><td>PWA / Offline / KI</td><td>P3</td><td>6</td><td>=</td></tr>
+<tr><td>Tests + QA + Deployment</td><td>alle</td><td>6</td><td>+1</td></tr>
+<tr style="background:var(--navy);color:#fff"><td><strong>GESAMT</strong></td><td></td><td><strong>50 Tage</strong></td><td>+13 vs. v1.0</td></tr>
+</table></div>
+
+<!-- DEPLOYMENT -->
+<h1 class="sec page-break">13. Deployment-Konzept</h1>
+<pre>Repository:   github.com/post-sv-nuernberg/belegung
+Branches:     main → Produktion  |  staging → Test  |  feature/* → Entwicklung
+CI/CD:        GitHub Actions: PR → Tests; merge main → Deploy Firebase Hosting
+Backup:       Firestore Export → Google Cloud Storage (täglich, automatisch)
+Security:     Firebase Security Rules · Cloud Functions für sensible Ops · Audit-Log write-only</pre>
+
+<p style="text-align:center;margin-top:48px;color:var(--muted);font-size:13px">
+— Ende des Fachkonzepts v2.1 —<br>
+Post SV Nürnberg e.V. · Fußballabteilung · Version 2.1 · Juni 2026
+</p>
+
+</div>
+</body>
+</html>
